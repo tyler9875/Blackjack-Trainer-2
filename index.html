@@ -284,7 +284,7 @@ function render(){
       <div class="seatTitle">Player ${pi+1}</div>
       <div class="bet">$${money(p.hands.reduce((s,h)=>s+h.bet,0))}${p.insurance?` • Ins $${money(p.insurance)}`:""}</div>
       <div class="chips">${chips(p.hands.reduce((s,h)=>s+h.bet,0))}</div>
-      <div class="handWrap">${p.hands.map((h,hi)=>`<div class="hand ${(isCurrent&&g.hi===hi)?"active":""}">
+      <div class="handWrap">${p.hands.map((h,hi)=>h.cleared?"":`<div class="hand ${(isCurrent&&g.hi===hi)?"active":""}">
         <div class="cards">${h.cards.map(c=>card(c)).join("")}</div>
         <div class="actionTag">${h.action||""}</div>
       </div>`).join("")}</div>
@@ -307,8 +307,17 @@ function checkTotal(asBust){
   const val=parseInt($("#totalInput").value,10);
   const ok=asBust?x.bust:(!x.bust&&val===x.total);
   g.totalAttempts++;
-  if(ok)g.totalCorrect++;
-  else g.totalMistakes++;
+  if(ok){
+    g.totalCorrect++;
+    // Casino-style bust cleanup: once the dealer correctly calls BUST,
+    // remove that busted player's cards and wager immediately.
+    if(asBust && x.bust && g.await.target !== g.dealer){
+      g.await.target.cleared = true;
+      g.await.target.cards = [];
+      g.await.target.action = "";
+      render();
+    }
+  } else g.totalMistakes++;
   $("#totalEntry").classList.add("hidden");
   const r=g.await.resolve;g.await=null;r();
 }
@@ -431,7 +440,9 @@ function expectedSettlement(h){
 async function beginSettlement(){
   g.phase="settle";
   g.queue=[];
-  g.players.forEach((p,pi)=>p.hands.forEach((h,hi)=>g.queue.push({pi,hi,h,expected:expectedSettlement(h)})));
+  g.players.forEach((p,pi)=>p.hands.forEach((h,hi)=>{
+    if(!h.cleared) g.queue.push({pi,hi,h,expected:expectedSettlement(h)});
+  }));
   g.qi=0;
   showSettlement();
 }
