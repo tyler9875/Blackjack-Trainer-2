@@ -136,6 +136,185 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   .players{grid-template-columns:repeat(2,1fr);margin-top:235px}
   .seat{min-height:160px}
 }
+
+/* -------- Phone table layout: everything stays on one screen -------- */
+@media (max-width: 600px){
+  html,body{height:100%;overflow:hidden}
+  .app{height:100dvh;min-height:100dvh;overflow:hidden}
+  .topbar{
+    height:50px;
+    min-height:50px;
+    padding:calc(4px + env(safe-area-inset-top)) 7px 4px;
+  }
+  .brand{font-size:.92rem}
+  .badge{font-size:.62rem;padding:.24rem .42rem}
+  .icon{width:34px;height:34px;border-radius:10px}
+
+  #sim.screen{
+    height:calc(100dvh - 50px);
+    padding:2px 4px calc(3px + env(safe-area-inset-bottom));
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    max-width:none;
+  }
+  #sim.hidden{display:none!important}
+
+  #sim .toolbar{
+    flex:0 0 34px;
+    height:34px;
+    margin:0 0 2px;
+    gap:5px;
+    overflow:hidden;
+  }
+  #sim .toolbar .primary{
+    padding:.38rem .7rem;
+    border-radius:10px;
+    font-size:.76rem;
+  }
+  #sim .toolbar .small{font-size:.62rem;white-space:nowrap}
+
+  #sim .table{
+    flex:1 1 auto;
+    min-height:0;
+    height:auto;
+    padding:4px 4px 5px;
+    border-width:3px;
+    border-bottom-width:7px;
+    border-radius:28% 28% 7% 7% / 8% 8% 3% 3%;
+    overflow:hidden;
+  }
+  #sim .table:before{
+    top:43%;
+    width:78%;
+    padding:1.2rem .35rem;
+    font-size:.47rem;
+    letter-spacing:.07em;
+  }
+
+  #sim .dealer{
+    min-height:76px;
+    height:76px;
+  }
+  #sim .label{font-size:.57rem}
+  #sim .dealer .cards{
+    min-height:54px;
+    margin:1px 0;
+  }
+  #sim .dealer .actionTag{font-size:.54rem}
+
+  #sim .players{
+    position:absolute;
+    left:4px; right:4px; bottom:4px;
+    margin:0;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(88px,auto);
+    gap:3px;
+    align-items:end;
+  }
+  #sim .seat{
+    min-height:88px;
+    height:auto;
+    padding:2px 2px;
+    border-radius:11px;
+    overflow:hidden;
+  }
+  #sim .seatTitle{font-size:.60rem;line-height:1.05}
+  #sim .bet{font-size:.53rem;line-height:1.05}
+  #sim .chips{
+    min-height:17px;
+    height:17px;
+    margin:1px 0;
+  }
+  #sim .chip{
+    width:18px;height:18px;
+    border-width:2px;
+    font-size:.35rem;
+    margin-left:-5px;
+  }
+  #sim .handWrap{gap:1px}
+  #sim .hand{
+    min-width:0;
+    width:auto;
+    padding:0;
+    border-radius:7px;
+  }
+  #sim .hand .cards{
+    min-height:43px;
+    margin:0;
+  }
+  #sim .actionTag{
+    font-size:.45rem;
+    min-height:.55em;
+    line-height:1;
+  }
+
+  #sim .card{
+    width:30px;
+    height:43px;
+    border-radius:4px;
+    padding:2px;
+    font-size:.48rem;
+    margin-left:-10px;
+    box-shadow:0 2px 4px rgba(0,0,0,.32);
+  }
+  #sim .card .big{font-size:.92rem}
+  #sim .card.back{border-width:2px}
+
+  #sim .panel{
+    flex:0 0 122px;
+    height:122px;
+    margin-top:3px;
+    padding:6px;
+    border-radius:13px;
+    overflow:hidden;
+  }
+  #sim .status{
+    font-size:.78rem;
+    line-height:1.1;
+    min-height:17px;
+  }
+  #sim .substatus{
+    font-size:.58rem;
+    line-height:1.1;
+    margin-top:2px;
+    min-height:13px;
+  }
+  #sim .entry{
+    margin-top:5px;
+    gap:4px;
+    flex-wrap:nowrap;
+  }
+  #sim .entry input{
+    width:83px;
+    padding:.48rem .5rem;
+    border-radius:9px;
+    font-size:.82rem;
+  }
+  #sim .primary,#sim .secondary,#sim .settle{
+    padding:.48rem .55rem;
+    border-radius:9px;
+    font-size:.68rem;
+  }
+  #sim .settlementGrid{
+    grid-template-columns:repeat(4,1fr);
+    gap:3px;
+    margin-top:5px;
+  }
+  #sim .settle{padding:.48rem .18rem;font-size:.58rem}
+  #sim .payoutLine{margin-top:3px;font-size:.58rem}
+  #sim .roundSummary{margin-top:2px;font-size:.55rem;line-height:1.05}
+  #sim #collectCards{margin-top:5px!important;width:100%}
+
+  /* Keep the speed drill independently scroll-free and compact too. */
+  #drill.screen{
+    height:calc(100dvh - 50px);
+    overflow:auto;
+    padding-top:3px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -296,7 +475,7 @@ function waitForTotal(target,label){
     g.await={target,label,resolve};
     $("#totalEntry").classList.remove("hidden");
     $("#totalInput").value="";
-    status(`Call ${label}'s total.`,`Look only at the cards. The game will not display totals.`);
+    status(`Call ${label}'s total.`,`If it is a bust, press BUST — the wager and cards will be swept immediately.`);
     $("#totalInput").focus()
   })
 }
@@ -314,6 +493,7 @@ function checkTotal(asBust){
     if(asBust && x.bust && g.await.target !== g.dealer){
       g.await.target.cleared = true;
       g.await.target.cards = [];
+      g.await.target.bet = 0;
       g.await.target.action = "";
       render();
     }
