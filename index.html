@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#063d2d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dealer Trainer">
+<title>Blackjack Dealer Trainer</title>
+<style>
+:root{
+  --felt:#075b3f; --felt2:#043c2d; --gold:#d6b35a; --cream:#f4ecd2;
+  --panel:rgba(3,18,14,.88); --line:rgba(255,255,255,.16); --soft:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#021811;color:white}
+button,input{font:inherit}
+button{touch-action:manipulation}
+.hidden{display:none!important}
+.app{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% 12%,rgba(255,255,255,.06),transparent 26rem),
+    linear-gradient(#063e2e,#02271d);
+}
+.topbar{
+  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:.7rem;
+  padding:calc(.6rem + env(safe-area-inset-top)) .8rem .6rem;
+  background:linear-gradient(rgba(1,18,13,.98),rgba(1,18,13,.82),transparent);
+  backdrop-filter:blur(10px)
+}
+.brand{font-weight:950;flex:1}
+.badge{font-size:.75rem;font-weight:900;border:1px solid var(--line);border-radius:999px;padding:.35rem .55rem;background:rgba(0,0,0,.25)}
+.icon{width:40px;height:40px;border:1px solid var(--line);border-radius:13px;background:rgba(0,0,0,.25);color:white;font-size:1.25rem}
+.screen{padding:.75rem .7rem calc(1rem + env(safe-area-inset-bottom));max-width:1180px;margin:auto}
+.hero{max-width:760px;margin:7vh auto 1rem;text-align:center}
+.hero h1{font-size:clamp(2rem,8vw,4rem);line-height:.95;margin:.2rem 0 .7rem}
+.hero p{opacity:.83;line-height:1.5}
+.modegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1.2rem}
+.mode{
+  border:1px solid var(--line);border-radius:24px;padding:1.1rem;text-align:left;color:white;
+  background:linear-gradient(145deg,rgba(0,0,0,.26),rgba(255,255,255,.06));box-shadow:0 12px 28px rgba(0,0,0,.28)
+}
+.mode h2{margin:.2rem 0 .45rem}
+.primary,.secondary,.settle{
+  border:0;border-radius:14px;padding:.8rem .95rem;font-weight:900;cursor:pointer
+}
+.primary{background:var(--gold);color:#172117}
+.secondary{background:rgba(255,255,255,.1);color:white;border:1px solid var(--line)}
+.toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
+.small{font-size:.78rem;opacity:.75}
+.table{
+  min-height:680px;border:4px solid #b5924b;border-bottom-width:14px;border-radius:46% 46% 15% 15% / 12% 12% 5% 5%;
+  background:
+    radial-gradient(ellipse at 50% 18%,rgba(255,255,255,.06),transparent 35%),
+    radial-gradient(ellipse at center,var(--felt),var(--felt2));
+  box-shadow:inset 0 0 0 6px #362514,inset 0 0 50px rgba(0,0,0,.36),0 14px 35px rgba(0,0,0,.35);
+  position:relative;overflow:hidden;padding:1rem .7rem 1.2rem
+}
+.table:before{
+  content:"BLACKJACK  •  PAYS 3 TO 2  •  DEALER HITS SOFT 17";
+  position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+  width:82%;border:2px solid rgba(244,236,210,.16);border-radius:50%;padding:2.8rem .8rem;
+  text-align:center;letter-spacing:.11em;font-size:.75rem;font-weight:900;color:rgba(244,236,210,.23)
+}
+.dealer{position:relative;z-index:3;text-align:center;min-height:185px}
+.label{font-size:.73rem;font-weight:950;letter-spacing:.11em;text-transform:uppercase;opacity:.72}
+.cards{display:flex;justify-content:center;align-items:flex-start;min-height:86px;margin:.3rem 0}
+.card{
+  width:50px;height:72px;background:#fff;color:#111;border-radius:7px;border:1px solid #ddd;
+  box-shadow:0 4px 8px rgba(0,0,0,.35);padding:3px;display:flex;flex-direction:column;justify-content:space-between;
+  font-size:.78rem;font-weight:950;margin-left:-14px
+}
+.card:first-child{margin-left:0}
+.card.red{color:#c31730}
+.card .big{font-size:1.55rem;align-self:center;line-height:1}
+.card.back{background:repeating-linear-gradient(45deg,#173367 0 4px,#f4f7fb 4px 6px,#a6202b 6px 10px);border:3px solid white}
+.players{
+  position:relative;z-index:4;display:grid;grid-template-columns:repeat(3,1fr);
+  gap:.55rem;margin-top:225px
+}
+.seat{
+  min-height:185px;border:1px solid var(--line);border-radius:20px;padding:.5rem .35rem;text-align:center;
+  background:linear-gradient(rgba(0,0,0,.10),rgba(0,0,0,.27))
+}
+.seat.current{outline:3px solid var(--gold);box-shadow:0 0 0 4px rgba(214,179,90,.13)}
+.seat.done{opacity:.93}
+.seatTitle{font-size:.8rem;font-weight:950}
+.bet{font-size:.72rem;opacity:.8}
+.chips{display:flex;justify-content:center;align-items:flex-end;min-height:34px;flex-wrap:wrap;margin:.2rem 0}
+.chip{
+  width:30px;height:30px;border-radius:50%;border:3px dashed rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;font-size:.54rem;font-weight:950;color:white;
+  text-shadow:0 1px 2px #000;box-shadow:0 2px 5px rgba(0,0,0,.3);margin-left:-7px
+}
+.chip:first-child{margin-left:0}
+.quarter{background:#9ba2a7;color:#111;text-shadow:none;border-color:#eef0f2}.white{background:#f5f5f5;color:#111;text-shadow:none;border-color:#555}
+.pink{background:#e957a1}.redc{background:#c62929}.green{background:#18834d}.black{background:#151515}.purple{background:#6d36a5}.orange{background:#e4771a}
+.handWrap{display:flex;justify-content:center;gap:.25rem;flex-wrap:wrap}
+.hand{min-width:100px;padding:.2rem;border-radius:12px}
+.hand.active{background:rgba(0,0,0,.22);outline:2px solid rgba(214,179,90,.7)}
+.actionTag{font-size:.67rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;min-height:1em;color:#f8dda0}
+.panel{
+  position:relative;z-index:10;margin-top:.7rem;background:var(--panel);border:1px solid var(--line);
+  border-radius:20px;padding:.8rem;box-shadow:0 12px 30px rgba(0,0,0,.3)
+}
+.status{font-weight:950;font-size:1rem;line-height:1.35}
+.substatus{font-size:.78rem;opacity:.75;margin-top:.25rem}
+.entry{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin-top:.65rem}
+.entry input{width:110px;border:0;border-radius:12px;padding:.78rem;background:#fff;color:#111;font-weight:900;font-size:1rem}
+.settlementGrid{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:.45rem;margin-top:.7rem}
+.settle{background:rgba(255,255,255,.10);color:white;border:1px solid var(--line)}
+.settle.done{opacity:.35}
+.payoutLine{margin-top:.5rem;font-size:.83rem;opacity:.85}
+.roundSummary{margin-top:.55rem;font-size:.78rem;opacity:.78}
+.drill{
+  max-width:680px;margin:5vh auto;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:25px;padding:1.1rem;text-align:center
+}
+.timer{font-size:3rem;font-weight:1000;margin:.35rem 0}
+.timer.low{color:#ff6b6b}
+.drillhand{display:flex;justify-content:center;min-height:135px;align-items:center;margin:1rem 0}
+.drillhand .card{width:72px;height:105px;font-size:1rem;margin-left:-18px}
+.drillhand .card .big{font-size:2.2rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.7rem 0}
+.stat{background:var(--soft);border-radius:14px;padding:.65rem .3rem}
+.stat strong{display:block;font-size:1.18rem}
+select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
+@media(min-width:760px){
+  .players{grid-template-columns:repeat(6,1fr);margin-top:250px}
+  .table{min-height:730px;padding-inline:1.1rem}
+  .seat{min-height:205px}
+  .card{width:55px;height:80px}
+}
+@media(max-width:520px){
+  .table{min-height:760px;border-radius:43% 43% 10% 10% / 9% 9% 4% 4%}
+  .players{grid-template-columns:repeat(2,1fr);margin-top:235px}
+  .seat{min-height:160px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <button id="back" class="icon hidden">‹</button>
+  <div class="brand">♠ Dealer Trainer</div>
+  <span class="badge">H17 • 3:2</span>
+</header>
+
+<main id="menu" class="screen">
+  <section class="hero">
+    <div class="small">FREE-FLOWING BLACKJACK PRACTICE</div>
+    <h1>Be the dealer.</h1>
+    <p>The game deals and plays the customers automatically. You keep the hand totals in your head, call each finished hand, play the dealer, settle the bets, then sweep the table.</p>
+    <div class="modegrid">
+      <button id="simStart" class="mode">
+        <div class="small">MAIN MODE</div><h2>Live Dealer Round</h2>
+        <p>Automatic deal, automatic player decisions, total calls, dealer hand, payouts, and collect-all-cards.</p>
+        <span class="primary">Start dealing</span>
+      </button>
+      <button id="drillStart" class="mode">
+        <div class="small">SPEED MODE</div><h2>10-Second Totals</h2>
+        <p>Random 2–5 card hands. No displayed totals — read the cards and answer fast.</p>
+        <span class="primary">Start drill</span>
+      </button>
+    </div>
+  </section>
+</main>
+
+<main id="sim" class="screen hidden">
+  <div class="toolbar">
+    <button id="newRound" class="primary">New Round</button>
+    <span class="small">Cards and player decisions move automatically.</span>
+  </div>
+
+  <section class="table">
+    <div class="dealer">
+      <div class="label">Dealer</div>
+      <div id="dealerCards" class="cards"></div>
+      <div id="dealerAction" class="actionTag"></div>
+    </div>
+    <div id="players" class="players"></div>
+  </section>
+
+  <section class="panel">
+    <div id="status" class="status">Starting...</div>
+    <div id="substatus" class="substatus"></div>
+
+    <div id="totalEntry" class="entry hidden">
+      <input id="totalInput" inputmode="numeric" placeholder="Total">
+      <button id="totalEnter" class="primary">Enter</button>
+      <button id="totalBust" class="secondary">BUST</button>
+    </div>
+
+    <div id="settleArea" class="hidden">
+      <div class="settlementGrid">
+        <button class="settle" data-settle="take">Take Bet</button>
+        <button class="settle" data-settle="push">Push</button>
+        <button class="settle" data-settle="pay1">Pay 1:1</button>
+        <button class="settle" data-settle="payBJ">Pay 3:2</button>
+      </div>
+      <div id="payoutLine" class="payoutLine"></div>
+    </div>
+
+    <button id="collectCards" class="primary hidden" style="margin-top:.7rem">Collect All Cards</button>
+    <div id="summary" class="roundSummary"></div>
+  </section>
+</main>
+
+<main id="drill" class="screen hidden">
+  <section class="drill">
+    <div class="small">10-SECOND HAND TOTALS</div>
+    <h2 style="margin:.2rem 0">Read the cards. Call the number.</h2>
+    <div style="display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin:.6rem 0">
+      <select id="drillCount">
+        <option value="random">Random 2–5</option><option value="2">2 cards</option><option value="3">3 cards</option><option value="4">4 cards</option><option value="5">5 cards</option>
+      </select>
+      <button id="resetDrill" class="secondary">Reset</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="small">Correct</span><strong id="dc">0</strong></div>
+      <div class="stat"><span class="small">Streak</span><strong id="ds">0</strong></div>
+      <div class="stat"><span class="small">Average</span><strong id="da">—</strong></div>
+    </div>
+    <div id="timer" class="timer">10.0</div>
+    <div id="drillHand" class="drillhand"></div>
+    <div id="drillFeedback" class="substatus"></div>
+    <div class="entry" style="justify-content:center">
+      <input id="drillInput" inputmode="numeric" placeholder="Total">
+      <button id="drillEnter" class="primary">Enter</button>
+      <button id="drillBust" class="secondary">BUST</button>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+(()=>{
+"use strict";
+const $=s=>document.querySelector(s);
+const menu=$("#menu"),sim=$("#sim"),drill=$("#drill"),back=$("#back");
+const SUITS=[["♠",0],["♥",1],["♦",1],["♣",0]];
+const RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+const DENOMS=[
+  [1000,"orange","$1K"],[500,"purple","$500"],[100,"black","$100"],[25,"green","$25"],
+  [5,"redc","$5"],[2.5,"pink","$2.5"],[1,"white","$1"],[.25,"quarter","25¢"]
+];
+let shoe=[];
+let g=null;
+let timerHandles=[];
+const sleep=ms=>new Promise(r=>{const id=setTimeout(r,ms);timerHandles.push(id)});
+function clearTimers(){timerHandles.forEach(clearTimeout);timerHandles=[]}
+function show(which){
+  [menu,sim,drill].forEach(x=>x.classList.add("hidden"));
+  if(which==="menu"){menu.classList.remove("hidden");back.classList.add("hidden")}
+  if(which==="sim"){sim.classList.remove("hidden");back.classList.remove("hidden")}
+  if(which==="drill"){drill.classList.remove("hidden");back.classList.remove("hidden");startDrill()}
+}
+back.onclick=()=>{clearTimers();stopDrill();show("menu")}
+$("#simStart").onclick=()=>{show("sim");newRound()}
+$("#drillStart").onclick=()=>show("drill")
+$("#newRound").onclick=newRound;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newShoe(){let a=[];for(let d=0;d<6;d++)for(const [s,red] of SUITS)for(const rank of RANKS)a.push({rank,s,red});return shuffle(a)}
+function draw(){if(shoe.length<70)shoe=newShoe();return shoe.pop()}
+function v(c){return c.rank==="A"?11:["J","Q","K"].includes(c.rank)?10:+c.rank}
+function info(cards){let t=cards.reduce((s,c)=>s+v(c),0),aces=cards.filter(c=>c.rank==="A").length;while(t>21&&aces){t-=10;aces--}return{total:t,soft:aces>0,bust:t>21}}
+function bj(h){return !h.split&&h.cards.length===2&&info(h.cards).total===21}
+function pair(h){return h.cards.length===2&&v(h.cards[0])===v(h.cards[1])}
+function money(x){x=Math.round(x*100)/100;return x.toLocaleString(undefined,{minimumFractionDigits:x%1?2:0,maximumFractionDigits:2})}
+function randomBet(){const a=[5,10,12.5,15,20,25,30,35,40,50,60,75,80,100];return a[Math.floor(Math.random()*a.length)]}
+function card(c,back=false){if(back)return `<div class="card back"></div>`;return `<div class="card ${c.red?"red":""}"><span>${c.rank}${c.s}</span><span class="big">${c.s}</span><span style="align-self:end;transform:rotate(180deg)">${c.rank}${c.s}</span></div>`}
+function chips(n){let left=Math.round(n*4)/4,h="";for(const [val,cls,label] of DENOMS){const cnt=Math.floor((left+1e-8)/val);for(let i=0;i<Math.min(cnt,4);i++)h+=`<span class="chip ${cls}">${label}</span>`;left=Math.round((left-cnt*val)*100)/100}return h}
+function hand(){return{cards:[],bet:0,split:false,double:false,done:false,called:false,action:""}}
+function status(t,s=""){$("#status").textContent=t;$("#substatus").textContent=s}
+function hideInputs(){$("#totalEntry").classList.add("hidden");$("#settleArea").classList.add("hidden")}
+function render(){
+  if(!g)return;
+  $("#dealerCards").innerHTML=g.dealer.cards.map((c,i)=>card(c,i===1&&!g.dealer.revealed)).join("");
+  $("#dealerAction").textContent=g.dealer.action||"";
+  $("#players").innerHTML=g.players.map((p,pi)=>{
+    const isCurrent=g.phase==="players"&&pi===g.pi || g.phase==="settle"&&g.settle?.pi===pi;
+    return `<div class="seat ${isCurrent?"current":""} ${p.done?"done":""}">
+      <div class="seatTitle">Player ${pi+1}</div>
+      <div class="bet">$${money(p.hands.reduce((s,h)=>s+h.bet,0))}${p.insurance?` • Ins $${money(p.insurance)}`:""}</div>
+      <div class="chips">${chips(p.hands.reduce((s,h)=>s+h.bet,0))}</div>
+      <div class="handWrap">${p.hands.map((h,hi)=>`<div class="hand ${(isCurrent&&g.hi===hi)?"active":""}">
+        <div class="cards">${h.cards.map(c=>card(c)).join("")}</div>
+        <div class="actionTag">${h.action||""}</div>
+      </div>`).join("")}</div>
+    </div>`
+  }).join("")
+}
+function waitForTotal(target,label){
+  return new Promise(resolve=>{
+    g.await={target,label,resolve};
+    $("#totalEntry").classList.remove("hidden");
+    $("#totalInput").value="";
+    status(`Call ${label}'s total.`,`Look only at the cards. The game will not display totals.`);
+    $("#totalInput").focus()
+  })
+}
+function checkTotal(asBust){
+  if(!g?.await)return;
+  const cards=g.await.target.cards;
+  const x=info(cards);
+  const val=parseInt($("#totalInput").value,10);
+  const ok=asBust?x.bust:(!x.bust&&val===x.total);
+  g.totalAttempts++;
+  if(ok)g.totalCorrect++;
+  else g.totalMistakes++;
+  $("#totalEntry").classList.add("hidden");
+  const r=g.await.resolve;g.await=null;r();
+}
+$("#totalEnter").onclick=()=>checkTotal(false);
+$("#totalBust").onclick=()=>checkTotal(true);
+$("#totalInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkTotal(false)});
+
+async function newRound(){
+  clearTimers();hideInputs();$("#collectCards").classList.add("hidden");$("#summary").textContent="";
+  if(!shoe.length)shoe=newShoe();
+  const n=1+Math.floor(Math.random()*6);
+  g={round:(g?.round||0)+1,phase:"deal",players:[],dealer:{cards:[],revealed:false,action:""},pi:0,hi:0,totalCorrect:0,totalAttempts:0,totalMistakes:0,settleErrors:0};
+  for(let i=0;i<n;i++){const b=randomBet(),h=hand();h.bet=b;g.players.push({hands:[h],insurance:0,done:false})}
+  render();
+  status("Dealing...","Watch the table like a live game.");
+  await autoInitialDeal();
+  await insuranceAndPeek();
+  if(g.phase!=="settle")await playPlayers();
+  if(g.phase!=="settle")await playDealer();
+  await beginSettlement();
+}
+async function autoInitialDeal(){
+  for(let pass=0;pass<2;pass++){
+    for(let i=0;i<g.players.length;i++){
+      g.players[i].hands[0].cards.push(draw());render();await sleep(260)
+    }
+    g.dealer.cards.push(draw());render();await sleep(300)
+  }
+}
+async function insuranceAndPeek(){
+  const up=g.dealer.cards[0];
+  if(up.rank==="A"){
+    status("Insurance is offered.","The players decide automatically.");
+    await sleep(700);
+    g.players.forEach(p=>{if(Math.random()<.35)p.insurance=Math.round((p.hands[0].bet/2)*4)/4});
+    render();await sleep(650)
+  }
+  if(up.rank==="A"||v(up)===10){
+    status("Dealer checks for blackjack.","");
+    await sleep(650);
+    const dealerBJ=info(g.dealer.cards).total===21;
+    if(dealerBJ){
+      g.dealer.revealed=true;g.dealer.action="BLACKJACK";render();await sleep(650);
+      g.phase="settle";
+    }
+  }
+}
+function choosePlayerAction(h){
+  const x=info(h.cards);
+  if(x.bust||x.total===21)return "stand";
+  if(h.cards.length===2&&pair(h)&&!h.split){
+    const pv=v(h.cards[0]);
+    if([8,11].includes(pv))return "split";
+    if([9,7].includes(pv)&&Math.random()<.35)return "split";
+  }
+  if(h.cards.length===2&&[9,10,11].includes(x.total)&&Math.random()<.5)return "double";
+  if(x.total<=11)return "hit";
+  if(x.total>=17)return "stand";
+  return Math.random()<.48?"hit":"stand";
+}
+async function playPlayers(){
+  g.phase="players";
+  for(g.pi=0;g.pi<g.players.length;g.pi++){
+    const p=g.players[g.pi];
+    for(g.hi=0;g.hi<p.hands.length;g.hi++){
+      let h=p.hands[g.hi];
+      if(bj(h)){h.action="BLACKJACK";render();await waitForTotal(h,`Player ${g.pi+1}`);continue}
+      let running=true;
+      while(running){
+        const act=choosePlayerAction(h);
+        h.action=act.toUpperCase();render();
+        status(`Player ${g.pi+1}${p.hands.length>1?` hand ${g.hi+1}`:""}: ${act.toUpperCase()}`,"You handle the table; the game handles the customer's decision.");
+        await sleep(600);
+        if(act==="hit"){
+          h.cards.push(draw());render();await sleep(450);
+          if(info(h.cards).bust||info(h.cards).total===21)running=false;
+        }else if(act==="double"){
+          h.bet*=2;h.double=true;h.cards.push(draw());render();await sleep(500);running=false;
+        }else if(act==="split"){
+          const c2=h.cards.pop();
+          h.split=true;
+          const h2=hand();h2.bet=h.bet;h2.split=true;h2.cards=[c2];
+          p.hands.splice(g.hi+1,0,h2);
+          h.cards.push(draw());h2.cards.push(draw());render();await sleep(550);
+        }else running=false;
+      }
+      h.done=true;render();
+      await waitForTotal(h,`Player ${g.pi+1}${p.hands.length>1?` hand ${g.hi+1}`:""}`);
+    }
+    p.done=true;render();await sleep(250)
+  }
+}
+async function playDealer(){
+  g.phase="dealer";
+  g.dealer.revealed=true;g.dealer.action="REVEAL";render();
+  status("Dealer hand.","Keep the dealer total in your head.");
+  await sleep(650);
+  while(true){
+    const x=info(g.dealer.cards);
+    if(x.bust)break;
+    const hit=x.total<17||(x.total===17&&x.soft);
+    if(!hit)break;
+    g.dealer.action="HIT";render();await sleep(450);
+    g.dealer.cards.push(draw());render();await sleep(550)
+  }
+  g.dealer.action="STAND";render();
+  await waitForTotal(g.dealer,"dealer");
+}
+function expectedSettlement(h){
+  const p=info(h.cards),d=info(g.dealer.cards);
+  const dealerBJ=g.dealer.cards.length===2&&d.total===21;
+  if(p.bust)return"take";
+  if(bj(h)){if(dealerBJ)return"push";return"payBJ"}
+  if(dealerBJ)return"take";
+  if(d.bust)return"pay1";
+  if(p.total>d.total)return"pay1";
+  if(p.total<d.total)return"take";
+  return"push"
+}
+async function beginSettlement(){
+  g.phase="settle";
+  g.queue=[];
+  g.players.forEach((p,pi)=>p.hands.forEach((h,hi)=>g.queue.push({pi,hi,h,expected:expectedSettlement(h)})));
+  g.qi=0;
+  showSettlement();
+}
+function showSettlement(){
+  hideInputs();
+  if(g.qi>=g.queue.length){
+    $("#settleArea").classList.add("hidden");
+    $("#collectCards").classList.remove("hidden");
+    status("All bets settled.","Sweep the layout when you're ready.");
+    $("#summary").textContent=`Totals called: ${g.totalCorrect}/${g.totalAttempts}. Settlement mistakes: ${g.settleErrors}.`;
+    return
+  }
+  const q=g.queue[g.qi];g.settle=q;g.pi=q.pi;g.hi=q.hi;render();
+  $("#settleArea").classList.remove("hidden");
+  status(`Settle Player ${q.pi+1}${g.players[q.pi].hands.length>1?` hand ${q.hi+1}`:""}.`,"Choose what you would physically do with the wager.");
+  $("#payoutLine").textContent=`Bet on this hand: $${money(q.h.bet)}`
+}
+document.querySelectorAll("[data-settle]").forEach(btn=>btn.onclick=()=>{
+  if(!g?.settle)return;
+  const chosen=btn.dataset.settle,q=g.settle;
+  if(chosen!==q.expected)g.settleErrors++;
+  g.qi++;showSettlement()
+});
+$("#collectCards").onclick=async()=>{
+  $("#collectCards").classList.add("hidden");
+  status("Collecting cards...","");
+  // visual sweep by removing hands left to right
+  for(const p of g.players){for(const h of p.hands){h.cards=[];h.action="";render();await sleep(90)}}
+  g.dealer.cards=[];g.dealer.action="";render();await sleep(250);
+  status("Table clear.","Press New Round for the next hand.");
+  $("#summary").textContent+=`  Round complete.`
+};
+
+/* speed drill */
+let d={correct:0,tries:0,streak:0,times:[],cards:[],ans:null,start:0,int:null,locked:false};
+function stopDrill(){if(d.int)clearInterval(d.int);d.int=null}
+function startDrill(){
+  if(drill.classList.contains("hidden"))return;
+  stopDrill();const val=$("#drillCount").value,n=val==="random"?2+Math.floor(Math.random()*4):+val;
+  d.cards=Array.from({length:n},draw);d.ans=info(d.cards);d.start=performance.now();d.locked=false;
+  $("#drillHand").innerHTML=d.cards.map(c=>card(c)).join("");$("#drillInput").value="";$("#drillFeedback").textContent="";
+  tick();d.int=setInterval(tick,100);setTimeout(()=>$("#drillInput").focus(),50)
+}
+function tick(){
+  if(d.locked)return;
+  const r=Math.max(0,10-(performance.now()-d.start)/1000),el=$("#timer");el.textContent=r.toFixed(1);el.classList.toggle("low",r<=3);
+  if(r<=0){d.locked=true;stopDrill();d.tries++;d.streak=0;$("#drillFeedback").textContent=`Time — answer was ${d.ans.bust?"BUST":d.ans.total}.`;renderD();setTimeout(startDrill,1100)}
+}
+function answerD(bust){
+  if(d.locked)return;
+  const n=parseInt($("#drillInput").value,10),ok=bust?d.ans.bust:(!d.ans.bust&&n===d.ans.total),t=(performance.now()-d.start)/1000;
+  d.tries++;
+  if(ok){d.correct++;d.streak++;d.times.push(t);d.locked=true;stopDrill();$("#drillFeedback").textContent=`Correct — ${t.toFixed(1)}s`;renderD();setTimeout(startDrill,600)}
+  else{d.streak=0;$("#drillFeedback").textContent="Wrong — keep going.";renderD()}
+}
+function renderD(){$("#dc").textContent=`${d.correct}/${d.tries}`;$("#ds").textContent=d.streak;$("#da").textContent=d.times.length?(d.times.reduce((a,b)=>a+b,0)/d.times.length).toFixed(1)+"s":"—"}
+$("#drillEnter").onclick=()=>answerD(false);$("#drillBust").onclick=()=>answerD(true);
+$("#drillInput").addEventListener("keydown",e=>{if(e.key==="Enter")answerD(false)});
+$("#drillCount").onchange=startDrill;$("#resetDrill").onclick=()=>{d.correct=0;d.tries=0;d.streak=0;d.times=[];renderD();startDrill()};
+shoe=newShoe();
+})();
+</script>
+</body>
+</html>
