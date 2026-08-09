@@ -425,6 +425,37 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   #sim .rackFooter button{font-size:.58rem;padding:.42rem .45rem}
 }
 
+
+/* v7 wager + added payout display */
+.betGroup{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:4px;
+}
+.wagerSide,.paidSide{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:1px;
+  position:relative;
+}
+.paidSide{
+  padding-left:4px;
+  border-left:1px solid rgba(255,255,255,.25);
+}
+.paidTag{
+  font-size:.42rem;
+  font-weight:950;
+  opacity:.75;
+  margin-left:1px;
+}
+@media(max-width:600px){
+  #sim .betGroup{gap:2px}
+  #sim .paidSide{padding-left:2px}
+  #sim .paidTag{font-size:.34rem}
+}
+
 </style>
 </head>
 <body>
@@ -505,8 +536,8 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   </section>
 
   <section id="rackPanel" class="panel rackPanel hidden">
-    <div class="status">Chip Rack — build the winnings payout</div>
-    <div class="substatus">Tap chips to add them. Tap a selected chip to remove it. Do not include the player's original wager.</div>
+    <div class="status">Chip Rack — add the dealer payout</div>
+    <div class="substatus">The player's original wager stays on the layout. Build only the additional chips you place next to it.</div>
     <div id="rack" class="rack"></div>
     <div class="rackFooter">
       <span id="rackTotal" class="badge">Selected: $0</span>
@@ -648,14 +679,17 @@ function wagerStacks(p){
     if(h.cleared)return "";
     const base=h.baseBet||h.bet;
     return `<div class="betGroup">
-      <div class="chips betStack">${chips(base)}</div>
-      ${h.double?`<div class="chips betStack secondBet">${chips(base)}</div>`:""}
+      <div class="wagerSide">
+        <div class="chips betStack">${chips(base)}</div>
+        ${h.double?`<div class="chips betStack secondBet">${chips(base)}</div>`:""}
+      </div>
+      ${h.paidAmount>0?`<div class="paidSide"><div class="chips betStack payoutStack">${chips(h.paidAmount)}</div><span class="paidTag">PAID</span></div>`:""}
     </div>`;
   }).join("");
 }
 function hand(){return{
   cards:[],bet:0,baseBet:0,split:false,splitAce:false,double:false,
-  horizontalIndexes:[],done:false,called:false,action:""
+  horizontalIndexes:[],done:false,called:false,action:"",paidAmount:0
 }}
 function status(t,s=""){$("#status").textContent=t;$("#substatus").textContent=s}
 function hideInputs(){$("#totalEntry").classList.add("hidden");$("#settleArea").classList.add("hidden")}
@@ -954,7 +988,7 @@ function showSettlement(){
   const q=g.queue[g.qi];g.settle=q;g.pi=q.pi;g.hi=q.hi;render();
   $("#settleArea").classList.remove("hidden");
   status(`Settle Player ${q.pi+1}${g.players[q.pi].hands.length>1?` hand ${q.hi+1}`:""}.`,"Choose what you would physically do with the wager.");
-  $("#payoutLine").textContent=`Bet on this hand: $${money(q.h.bet)}${g.players[q.pi].evenMoney&&bj(q.h)?" • EVEN MONEY":""}`
+  $("#payoutLine").textContent=`Original wager stays: $${money(q.h.bet)}${g.players[q.pi].evenMoney&&bj(q.h)?" • EVEN MONEY":""}`
 }
 let rackSelected=[];
 function rackValue(){return rackSelected.reduce((s,x)=>s+x,0)}
@@ -988,6 +1022,9 @@ $("#payRack").onclick=()=>{
     rackSelected=[];renderRack();return;
   }
   if(q.expected==="payBJ")session.blackjacksPaid++;
+  // Keep the player's original wager on the table and show only the added dealer payout beside it.
+  q.h.paidAmount=expected;
+  render();
   closeRack();g.qi++;showSettlement();
 };
 
@@ -1000,7 +1037,7 @@ document.querySelectorAll("[data-settle]").forEach(btn=>btn.onclick=()=>{
     g.qi++;showSettlement();return;
   }
   if(chosen==="pay1"||chosen==="payBJ"){
-    status(`Build Player ${q.pi+1}'s winnings payout.`,`Use the chip rack. Original wager is not included.`);
+    status(`Build Player ${q.pi+1}'s payout.`,`The original wager stays in place — add only the dealer's payout next to it.`);
     openRack();
   }else{
     g.qi++;showSettlement()
@@ -1011,7 +1048,7 @@ $("#collectCards").onclick=async()=>{
   status("Collecting cards...","");
   const cardsUsed=g.players.reduce((s,p)=>s+p.hands.reduce((a,h)=>a+h.cards.length,0),0)+g.dealer.cards.length;
   // visual sweep by removing hands left to right
-  for(const p of g.players){for(const h of p.hands){h.cards=[];h.action="";render();await sleep(90)}}
+  for(const p of g.players){for(const h of p.hands){h.cards=[];h.action="";h.paidAmount=0;render();await sleep(90)}}
   g.dealer.cards=[];g.dealer.action="";render();await sleep(250);
   discardCount += cardsUsed;
   updateShoeUI();
