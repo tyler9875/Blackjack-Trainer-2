@@ -456,10 +456,46 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   #sim .paidTag{font-size:.34rem}
 }
 
+
+/* v8 landscape layout and poker side bets */
+.rotateNotice{position:fixed;inset:0;z-index:9999;background:#031f18;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem}
+.rotateNotice span{font-size:.8rem;opacity:.72}
+.sideBetRow{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:1px 0}
+.sideSpot{min-width:0;border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:2px 1px;background:rgba(0,0,0,.14);font-size:.43rem;line-height:1;min-height:27px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sideSpot span{font-weight:950}.sideSpot b{font-size:.46rem;margin-top:1px}.sideSpot em{opacity:.32;font-style:normal}.sideSpot small{font-size:.36rem;color:#ffe39a}
+.llSpot{border-color:rgba(116,215,28,.48)}.topSpot{border-color:rgba(39,149,231,.48)}.p213Spot{border-color:rgba(202,74,221,.48)}
+.activeSide{outline:2px solid #ffd76e;background:rgba(255,215,110,.12)}
+.miniChips{min-height:11px!important;height:11px!important;margin:1px 0 0!important}.miniChips .chip{width:12px!important;height:12px!important;font-size:.25rem!important;border-width:1px!important}
+.emptySeat{opacity:.32;display:flex;flex-direction:column;align-items:center;justify-content:center}.emptyCircle{width:34px;height:34px;border-radius:50%;border:1px dashed rgba(255,255,255,.4);margin-top:5px}
+.payoutTrainerCard{max-width:560px}.payoutBetStage{display:flex;justify-content:center;margin:1rem 0}.payoutSpot{min-width:190px;border:2px solid rgba(214,179,90,.58);border-radius:50%;padding:1rem;background:rgba(0,0,0,.15)}
+.payoutSpot strong{font-size:1.7rem}.payoutBigChips .chip{width:42px;height:42px;font-size:.62rem}
+
+@media (orientation:landscape) and (max-height:600px){
+  html,body{height:100%;overflow:hidden}.app{height:100dvh;min-height:100dvh;overflow:hidden}
+  .topbar{height:32px;min-height:32px;padding:1px 6px}.brand{font-size:.75rem}.badge{font-size:.5rem;padding:.15rem .3rem}.icon{width:27px;height:27px}
+  #sim.screen{height:calc(100dvh - 32px);padding:1px 3px 2px;max-width:none;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 205px;grid-template-rows:28px minmax(0,1fr);gap:2px}
+  #sim .toolbar{grid-column:1/3;height:28px;margin:0;overflow:hidden}#sim .toolbar .primary,#sim .toolbar .secondary{padding:.25rem .43rem;font-size:.54rem}#sim .toolbar .small{font-size:.48rem}#sim .toolbar select{font-size:.48rem;padding:.18rem}
+  #sim .table{grid-column:1;grid-row:2;height:100%;min-height:0;padding:2px;border-width:2px;border-bottom-width:5px;border-radius:24% 24% 6% 6%/9% 9% 3% 3%}
+  #sim .dealer{height:58px;min-height:58px}#sim .dealer .cards{min-height:43px;height:43px;margin:0}#sim .dealer .card{width:29px;height:41px;font-size:.43rem}#sim .dealer .card .big{font-size:.85rem}
+  #sim .players{position:absolute;left:3px;right:3px;bottom:3px;margin:0;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:112px;gap:2px}
+  #sim .seat{min-height:110px;height:110px;padding:2px;border-radius:8px;overflow:hidden}#sim .seatTitle{font-size:.48rem}
+  #sim .sideBetRow{gap:1px}#sim .sideSpot{font-size:.31rem;min-height:23px;padding:1px}#sim .sideSpot b{font-size:.33rem}#sim .sideSpot small{font-size:.28rem}
+  #sim .bet{font-size:.42rem}#sim .betStacks{min-height:13px;height:13px}#sim .chip{width:15px;height:15px;font-size:.28rem;border-width:1px}
+  #sim .hand .cards{min-height:36px;height:36px}#sim .hand .card{width:25px;height:36px;font-size:.36rem;margin-left:-8px}#sim .hand .card .big{font-size:.72rem}
+  #sim .actionTag,#sim .blackjackMark{font-size:.33rem}
+  #sim .panel{grid-column:2;grid-row:2;height:100%;margin:0;padding:5px;border-radius:9px;overflow:hidden}#sim .status{font-size:.62rem;line-height:1.04}#sim .substatus{font-size:.45rem;line-height:1.04}
+  #sim .entry{margin-top:3px;gap:2px}#sim .entry input{width:62px;padding:.32rem;font-size:.62rem}#sim .primary,#sim .secondary,#sim .settle{padding:.33rem .34rem;font-size:.5rem}
+  #sim .settlementGrid{grid-template-columns:1fr 1fr;gap:2px;margin-top:4px}#sim .payoutLine,#sim .roundSummary{font-size:.43rem}
+  #sim .rackPanel{position:absolute;right:3px;top:61px;bottom:2px;left:auto;width:205px;height:auto;z-index:45}#sim .rack{grid-template-columns:repeat(4,1fr)}#sim .rackChip .chip{width:22px;height:22px}
+}
+
 </style>
 </head>
 <body>
 <div class="app">
+<div id="rotateNotice" class="rotateNotice hidden">
+  <div><strong>Rotate your phone sideways</strong><br><span>The live dealer table is designed for landscape so the table and controls stay visible together.</span></div>
+</div>
 <header class="topbar">
   <button id="back" class="icon hidden">‹</button>
   <div class="brand">♠ Dealer Trainer</div>
@@ -470,7 +506,7 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   <section class="hero">
     <div class="small">FREE-FLOWING BLACKJACK PRACTICE</div>
     <h1>Be the dealer.</h1>
-    <p>The game deals and plays the customers automatically. You keep the hand totals in your head, call each finished hand, play the dealer, settle the bets, then sweep the table.</p>
+    <p>The game deals and plays the customers automatically. Dealer mode now includes randomized poker side bets, settled first, followed by the main blackjack wagers.</p>
     <div class="modegrid">
       <button id="simStart" class="mode">
         <div class="small">MAIN MODE</div><h2>Live Dealer Round</h2>
@@ -481,6 +517,11 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
         <div class="small">SPEED MODE</div><h2>10-Second Totals</h2>
         <p>Random 2–5 card hands. No displayed totals — read the cards and answer fast.</p>
         <span class="primary">Start drill</span>
+      </button>
+      <button id="payoutStart" class="mode">
+        <div class="small">PAYOUT MODE</div><h2>3:2 Blackjack Payouts</h2>
+        <p>Common blackjack wagers starting at $5. Calculate the additional 3:2 payout while the original wager stays out.</p>
+        <span class="primary">Start payout trainer</span>
       </button>
     </div>
   </section>
@@ -583,13 +624,40 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
     </div>
   </section>
 </main>
+
+<main id="payoutTrainer" class="screen hidden">
+  <section class="drill payoutTrainerCard">
+    <div class="small">3:2 BLACKJACK PAYOUT TRAINER</div>
+    <h2 style="margin:.2rem 0">Pay the blackjack.</h2>
+    <div class="substatus">The original wager stays out. Enter only the additional winnings you place next to it.</div>
+    <div class="payoutBetStage">
+      <div class="payoutSpot">
+        <div class="small">PLAYER WAGER</div>
+        <div id="payoutBetChips" class="chips payoutBigChips"></div>
+        <strong id="payoutBetText">$5</strong>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="small">Correct</span><strong id="pc">0</strong></div>
+      <div class="stat"><span class="small">Streak</span><strong id="ps">0</strong></div>
+      <div class="stat"><span class="small">Average</span><strong id="pa">—</strong></div>
+    </div>
+    <div class="entry" style="justify-content:center">
+      <span style="font-weight:900">Pay $</span>
+      <input id="payoutTrainerInput" inputmode="decimal" placeholder="0.00">
+      <button id="payoutTrainerEnter" class="primary">Enter</button>
+    </div>
+    <div id="payoutTrainerFeedback" class="substatus" style="min-height:1.2em;margin-top:.45rem"></div>
+    <button id="payoutTrainerNext" class="secondary" style="margin-top:.55rem">New Bet</button>
+  </section>
+</main>
 </div>
 
 <script>
 (()=>{
 "use strict";
 const $=s=>document.querySelector(s);
-const menu=$("#menu"),sim=$("#sim"),drill=$("#drill"),back=$("#back");
+const menu=$("#menu"),sim=$("#sim"),drill=$("#drill"),payoutTrainer=$("#payoutTrainer"),back=$("#back");
 const SUITS=[["♠",0],["♥",1],["♦",1],["♣",0]];
 const RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const DENOMS=[
@@ -611,14 +679,22 @@ const session={
 const sleep=ms=>new Promise(r=>{const id=setTimeout(r,Math.max(70,ms*(speedMap[speedMode]||1)));timerHandles.push(id)});
 function clearTimers(){timerHandles.forEach(clearTimeout);timerHandles=[]}
 function show(which){
-  [menu,sim,drill].forEach(x=>x.classList.add("hidden"));
+  [menu,sim,drill,payoutTrainer].forEach(x=>x.classList.add("hidden"));$("#rotateNotice").classList.add("hidden");
   if(which==="menu"){menu.classList.remove("hidden");back.classList.add("hidden")}
-  if(which==="sim"){sim.classList.remove("hidden");back.classList.remove("hidden")}
+  if(which==="sim"){sim.classList.remove("hidden");back.classList.remove("hidden");
+    if(window.matchMedia("(orientation:portrait) and (max-width:900px)").matches)$("#rotateNotice").classList.remove("hidden")
+  }
   if(which==="drill"){drill.classList.remove("hidden");back.classList.remove("hidden");startDrill()}
+  if(which==="payout"){payoutTrainer.classList.remove("hidden");back.classList.remove("hidden");startPayoutTrainer()}
 }
 back.onclick=()=>{clearTimers();stopDrill();show("menu")}
+window.addEventListener("orientationchange",()=>setTimeout(()=>{
+  if(!sim.classList.contains("hidden")&&window.matchMedia("(orientation:portrait) and (max-width:900px)").matches)$("#rotateNotice").classList.remove("hidden");
+  else $("#rotateNotice").classList.add("hidden")
+},160))
 $("#simStart").onclick=()=>{show("sim");newRound()}
 $("#drillStart").onclick=()=>show("drill")
+$("#payoutStart").onclick=()=>show("payout")
 $("#newRound").onclick=newRound;
 $("#speedSelect").onchange=e=>{speedMode=e.target.value};
 function renderSessionStats(){
@@ -669,6 +745,51 @@ function bj(h){return !h.split&&h.cards.length===2&&info(h.cards).total===21}
 function pair(h){return h.cards.length===2&&v(h.cards[0])===v(h.cards[1])}
 function money(x){x=Math.round(x*100)/100;return x.toLocaleString(undefined,{minimumFractionDigits:x%1?2:0,maximumFractionDigits:2})}
 function randomBet(){const a=[5,10,12.5,15,20,25,30,35,40,50,60,75,80,100];return a[Math.floor(Math.random()*a.length)]}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function randomSideBets(){
+  return {
+    ll:Math.random()<.46?pick([5,10,15,20,25,30,35,40,45,50]):0,
+    top3:Math.random()<.38?pick([5,10]):0,
+    p213:Math.random()<.48?pick([5,10,15,20,25,30,40,50,75,100,150,200,250]):0
+  }
+}
+function pokerValue(c){if(c.rank==="A")return 14;if(c.rank==="K")return 13;if(c.rank==="Q")return 12;if(c.rank==="J")return 11;return +c.rank}
+function flush3(c){return c.length===3&&c.every(x=>x.s===c[0].s)}
+function trips3(c){return c.length===3&&c.every(x=>x.rank===c[0].rank)}
+function straight3(c){
+  if(c.length!==3)return false;
+  const a=[...new Set(c.map(pokerValue))].sort((x,y)=>x-y);
+  return a.length===3&&((a[0]+1===a[1]&&a[1]+1===a[2])||a.join(",")==="2,3,14")
+}
+function evalLuckyLadies(cards){
+  if(cards.length<2)return{name:"Lose",odds:0};
+  const c=cards.slice(0,2);
+  if(info(c).total!==20)return{name:"Lose",odds:0};
+  if(c[0].rank==="Q"&&c[1].rank==="Q")return{name:"Queens",odds:20};
+  if(c[0].rank===c[1].rank)return{name:"Pair",odds:9};
+  if(c[0].s===c[1].s)return{name:"Suited 20",odds:6};
+  return{name:"Any 20",odds:3}
+}
+// Top 3 evaluates exactly three cards: player's first two + dealer up card.
+function evalTop3(cards){
+  if(cards.length<3)return{name:"Lose",odds:0};
+  const c=cards.slice(0,3),t=trips3(c),f=flush3(c),s=straight3(c);
+  if(t&&f)return{name:"Suited Three of a Kind",odds:270};
+  if(s&&f)return{name:"Straight Flush",odds:180};
+  if(t)return{name:"Three of a Kind",odds:90};
+  return{name:"Lose",odds:0}
+}
+function eval213(cards,up){
+  if(cards.length<2||!up)return{name:"Lose",odds:0};
+  const c=[cards[0],cards[1],up],t=trips3(c),f=flush3(c),s=straight3(c);
+  if(s&&f)return{name:"Straight Flush",odds:9};
+  if(t)return{name:"Three of a Kind",odds:9};
+  if(s)return{name:"Straight",odds:9};
+  if(f)return{name:"Flush",odds:9};
+  return{name:"Lose",odds:0}
+}
+function sideLabel(k){return k==="ll"?"Lucky Ladies":k==="top3"?"Top 3":"21+3"}
+
 function card(c,back=false,horizontal=false){
   if(back)return `<div class="card back"></div>`;
   return `<div class="card ${c.red?"red":""} ${horizontal?"horizontal":""}"><span>${c.rank}${c.s}</span><span class="big">${c.s}</span><span style="align-self:end;transform:rotate(180deg)">${c.rank}${c.s}</span></div>`
@@ -689,28 +810,39 @@ function wagerStacks(p){
 }
 function hand(){return{
   cards:[],bet:0,baseBet:0,split:false,splitAce:false,double:false,
-  horizontalIndexes:[],done:false,called:false,action:"",paidAmount:0
+  horizontalIndexes:[],done:false,called:false,action:"",paidAmount:0,originalCards:[]
 }}
+function addToHand(h,c){h.cards.push(c);if(h.originalCards.length<3)h.originalCards.push(c)}
 function status(t,s=""){$("#status").textContent=t;$("#substatus").textContent=s}
 function hideInputs(){$("#totalEntry").classList.add("hidden");$("#settleArea").classList.add("hidden")}
 function render(){
   if(!g)return;
   $("#dealerCards").innerHTML=g.dealer.cards.map((c,i)=>card(c,i===1&&!g.dealer.revealed,false)).join("");
   $("#dealerAction").textContent=g.dealer.action||"";
-  $("#players").innerHTML=g.players.map((p,pi)=>{
-    const isCurrent=g.phase==="players"&&pi===g.pi || g.phase==="settle"&&g.settle?.pi===pi;
+  const occupied=g.players.map((p,pi)=>{
+    const isCurrent=(g.phase==="players"&&pi===g.pi)||(g.phase==="settle"&&g.settle?.pi===pi)||(g.phase==="sidebets"&&g.sideCurrent?.pi===pi);
+    const side=(key,label,cls)=>{
+      const amt=p.sideBets[key],paid=p.sidePaid?.[key]||0;
+      const active=g.phase==="sidebets"&&g.sideCurrent?.pi===pi&&g.sideCurrent?.type===key;
+      return `<div class="sideSpot ${cls} ${active?"activeSide":""}">
+        <span>${label}</span>
+        ${amt?`<b>$${money(amt)}</b><div class="chips miniChips">${chips(amt)}</div>${paid?`<small>+${money(paid)}</small>`:""}`:"<em>—</em>"}
+      </div>`
+    };
     return `<div class="seat ${isCurrent?"current":""} ${p.done?"done":""}">
       <div class="seatTitle">Player ${pi+1}</div>
+      <div class="sideBetRow">${side("ll","LL","llSpot")}${side("top3","TOP 3","topSpot")}${side("p213","21+3","p213Spot")}</div>
       <div class="bet">$${money(p.hands.reduce((s,h)=>s+h.bet,0))}${p.insurance?` • Ins $${money(p.insurance)}`:""}</div>
       <div class="betStacks">${wagerStacks(p)}</div>
       ${p.insurance?`<div class="insuranceStack">${chips(p.insurance)}<span class="insuranceTag">INS</span></div>`:""}
       <div class="handWrap">${p.hands.map((h,hi)=>h.cleared?"":`<div class="hand ${(isCurrent&&g.hi===hi)?"active":""}">
         <div class="cards">${h.cards.map((c,ci)=>card(c,false,(h.horizontalIndexes||[]).includes(ci))).join("")}</div>
-        <div class="actionTag">${h.action||""}</div>
-        ${bj(h)?`<div class="blackjackMark">BLACKJACK</div>`:""}
+        <div class="actionTag">${h.action||""}</div>${bj(h)?`<div class="blackjackMark">BLACKJACK</div>`:""}
       </div>`).join("")}</div>
     </div>`
-  }).join("")
+  }).join("");
+  const empties=Array.from({length:Math.max(0,5-g.players.length)},()=>`<div class="seat emptySeat"><div class="seatTitle">Empty</div><div class="emptyCircle"></div></div>`).join("");
+  $("#players").innerHTML=occupied+empties
 }
 function waitForTotal(target,label){
   return new Promise(resolve=>{
@@ -754,13 +886,16 @@ $("#totalInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkTotal(fa
 async function newRound(){
   clearTimers();hideInputs();$("#collectCards").classList.add("hidden");$("#summary").textContent="";
   if(!shoe.length)shoe=newShoe();
-  const n=1+Math.floor(Math.random()*6);
+  const n=2+Math.floor(Math.random()*4); // 2–5 players on five visible spots
   g={round:(g?.round||0)+1,phase:"deal",players:[],dealer:{cards:[],revealed:false,action:""},pi:0,hi:0,totalCorrect:0,totalAttempts:0,totalMistakes:0,settleErrors:0};
   session.rounds++;
   for(let i=0;i<n;i++){
     const b=randomBet(),h=hand();
     h.bet=b; h.baseBet=b;
-    g.players.push({hands:[h],insurance:0,done:false})
+    g.players.push({
+      hands:[h],insurance:0,done:false,
+      sideBets:randomSideBets(),sidePaid:{ll:0,top3:0,p213:0}
+    })
   }
   render();
   status("Dealing...","Watch the table like a live game.");
@@ -768,12 +903,13 @@ async function newRound(){
   await insuranceAndPeek();
   if(g.phase!=="settle")await playPlayers();
   if(g.phase!=="settle")await playDealer();
+  await settlePokerBets();
   await beginSettlement();
 }
 async function autoInitialDeal(){
   for(let pass=0;pass<2;pass++){
     for(let i=0;i<g.players.length;i++){
-      g.players[i].hands[0].cards.push(draw());render();await sleep(260)
+      addToHand(g.players[i].hands[0],draw());render();await sleep(260)
     }
     g.dealer.cards.push(draw());render();await sleep(300)
   }
@@ -894,12 +1030,12 @@ async function playPlayers(){
         status(`Player ${g.pi+1}${p.hands.length>1?` hand ${g.hi+1}`:""}: ${act.toUpperCase()}`,"You handle the table; the game handles the customer's decision.");
         await sleep(600);
         if(act==="hit"){
-          h.cards.push(draw());render();await sleep(450);
+          addToHand(h,draw());render();await sleep(450);
           if(info(h.cards).bust||info(h.cards).total===21)running=false;
         }else if(act==="double"){
           h.bet*=2;
           h.double=true;
-          h.cards.push(draw());
+          addToHand(h,draw());
           h.horizontalIndexes.push(h.cards.length-1); // double card is laid sideways
           render();await sleep(500);running=false;
         }else if(act==="split"){
@@ -908,11 +1044,11 @@ async function playPlayers(){
           h.split=true;
           if(!h.baseBet)h.baseBet=h.bet;
           const h2=hand();
-          h2.bet=h.baseBet||h.bet; h2.baseBet=h.baseBet||h.bet; h2.split=true; h2.cards=[c2];
+          h2.bet=h.baseBet||h.bet; h2.baseBet=h.baseBet||h.bet; h2.split=true; h2.cards=[c2];h2.originalCards=[c2];
           p.hands.splice(g.hi+1,0,h2);
 
           // Each split hand receives its next card.
-          h.cards.push(draw());
+          addToHand(h,draw());
           h2.cards.push(draw());
 
           if(splittingAces){
@@ -967,7 +1103,50 @@ function expectedSettlement(h,pObj){
   if(p.total<d.total)return"take";
   return"push"
 }
+
+function sideCardsFor(p){
+  const h=p.hands[0];
+  return h.originalCards.length?h.originalCards:h.cards
+}
+function buildSideQueue(){
+  const q=[];
+  g.players.forEach((p,pi)=>{
+    const c=sideCardsFor(p);
+    if(p.sideBets.ll)q.push({pi,type:"ll",bet:p.sideBets.ll,result:evalLuckyLadies(c)});
+    if(p.sideBets.top3)q.push({pi,type:"top3",bet:p.sideBets.top3,result:evalTop3([c[0],c[1],g.dealer.cards[0]])});
+    if(p.sideBets.p213)q.push({pi,type:"p213",bet:p.sideBets.p213,result:eval213(c,g.dealer.cards[0])})
+  });
+  return q
+}
+function restoreSettleButtons(){
+  const n={take:"Take Bet",push:"Push",pay1:"Pay 1:1",payBJ:"Pay 3:2"};
+  document.querySelectorAll("[data-settle]").forEach(b=>{b.style.display="";b.textContent=n[b.dataset.settle]})
+}
+async function settlePokerBets(){
+  g.phase="sidebets";g.sideQueue=buildSideQueue();g.sideIndex=0;
+  if(!g.sideQueue.length){status("No poker side bets this round.","Moving to blackjack settlement.");await sleep(220);return}
+  return new Promise(resolve=>{g.sideResolveAll=resolve;showSideBet()})
+}
+function showSideBet(){
+  hideInputs();
+  if(g.sideIndex>=g.sideQueue.length){
+    g.sideCurrent=null;render();restoreSettleButtons();
+    const r=g.sideResolveAll;g.sideResolveAll=null;
+    status("Poker bets settled.","Now settle the blackjack hands.");
+    setTimeout(()=>r&&r(),Math.max(80,220*(speedMap[speedMode]||1)));return
+  }
+  const q=g.sideQueue[g.sideIndex];g.sideCurrent=q;render();
+  $("#settleArea").classList.remove("hidden");
+  document.querySelectorAll("[data-settle]").forEach(b=>{
+    const a=b.dataset.settle;b.style.display=(a==="take"||a==="pay1")?"":"none";
+    b.textContent=a==="take"?"Take Side Bet":"Pay Side Bet"
+  });
+  status(`Settle Player ${q.pi+1} — ${sideLabel(q.type)}.`,`Clear poker bets first, then the main blackjack wagers.`);
+  $("#payoutLine").textContent=`${sideLabel(q.type)} wager: $${money(q.bet)}`
+}
+
 async function beginSettlement(){
+  restoreSettleButtons();
   g.phase="settle";
   g.queue=[];
   g.players.forEach((p,pi)=>p.hands.forEach((h,hi)=>{
@@ -1013,42 +1192,52 @@ $("#rackTotal").onclick=()=>{
   if(rackSelected.length){rackSelected.pop();renderRack()}
 };
 $("#payRack").onclick=()=>{
+  if(g?.pendingSideRack&&g.sideCurrent){
+    const q=g.sideCurrent,expected=g.sidePayout;
+    if(Math.abs(rackValue()-expected)>.001){
+      g.settleErrors++;session.payoutMistakes++;status("Side-bet payout is not correct yet.",`${q.result.odds}:1 on $${money(q.bet)}.`);rackSelected=[];renderRack();return
+    }
+    g.players[q.pi].sidePaid[q.type]=expected;g.pendingSideRack=false;closeRack();g.sideIndex++;render();showSideBet();return
+  }
   if(!g?.settle)return;
-  const q=g.settle;
-  const expected=q.expected==="payBJ"?q.h.bet*1.5:q.h.bet;
+  const q=g.settle,expected=q.expected==="payBJ"?q.h.bet*1.5:q.h.bet;
   if(Math.abs(rackValue()-expected)>.001){
-    g.settleErrors++;session.payoutMistakes++;
-    status(`Payout is not correct yet.`,`Rebuild the winnings payout from the rack.`);
-    rackSelected=[];renderRack();return;
+    g.settleErrors++;session.payoutMistakes++;status(`Payout is not correct yet.`,`Rebuild the winnings payout from the rack.`);rackSelected=[];renderRack();return
   }
   if(q.expected==="payBJ")session.blackjacksPaid++;
-  // Keep the player's original wager on the table and show only the added dealer payout beside it.
-  q.h.paidAmount=expected;
-  render();
-  closeRack();g.qi++;showSettlement();
+  q.h.paidAmount=expected;render();closeRack();g.qi++;showSettlement()
 };
 
 document.querySelectorAll("[data-settle]").forEach(btn=>btn.onclick=()=>{
+  const chosen=btn.dataset.settle;
+  if(g?.phase==="sidebets"&&g.sideCurrent){
+    const q=g.sideCurrent,win=q.result.odds>0;
+    if((win&&chosen!=="pay1")||(!win&&chosen!=="take")){
+      g.settleErrors++;session.settleMistakes++;status("Wrong side-bet action.",`Re-read ${sideLabel(q.type)} and try again.`);return
+    }
+    if(win){
+      g.pendingSideRack=true;g.sidePayout=q.bet*q.result.odds;
+      status(`${q.result.name}. Build the payout.`,`${q.result.odds}:1. The original side wager stays out.`);
+      openRack();return
+    }
+    g.players[q.pi].sideBets[q.type]=0;g.sideIndex++;render();showSideBet();return
+  }
   if(!g?.settle)return;
-  const chosen=btn.dataset.settle,q=g.settle;
-  if(chosen!==q.expected){
-    g.settleErrors++;session.settleMistakes++;
-    // Keep flow moving, but only open rack if the selected action is a payout that is actually correct.
-    g.qi++;showSettlement();return;
-  }
+  const q=g.settle;
+  if(chosen!==q.expected){g.settleErrors++;session.settleMistakes++;g.qi++;showSettlement();return}
   if(chosen==="pay1"||chosen==="payBJ"){
-    status(`Build Player ${q.pi+1}'s payout.`,`The original wager stays in place — add only the dealer's payout next to it.`);
-    openRack();
-  }else{
-    g.qi++;showSettlement()
-  }
+    status(`Build Player ${q.pi+1}'s payout.`,`The original wager stays in place — add only the dealer's payout next to it.`);openRack()
+  }else{g.qi++;showSettlement()}
 });
 $("#collectCards").onclick=async()=>{
   $("#collectCards").classList.add("hidden");
   status("Collecting cards...","");
   const cardsUsed=g.players.reduce((s,p)=>s+p.hands.reduce((a,h)=>a+h.cards.length,0),0)+g.dealer.cards.length;
   // visual sweep by removing hands left to right
-  for(const p of g.players){for(const h of p.hands){h.cards=[];h.action="";h.paidAmount=0;render();await sleep(90)}}
+  for(const p of g.players){
+    p.sideBets={ll:0,top3:0,p213:0};p.sidePaid={ll:0,top3:0,p213:0};
+    for(const h of p.hands){h.cards=[];h.action="";h.paidAmount=0;render();await sleep(90)}
+  }
   g.dealer.cards=[];g.dealer.action="";render();await sleep(250);
   discardCount += cardsUsed;
   updateShoeUI();
@@ -1087,6 +1276,33 @@ function renderD(){$("#dc").textContent=`${d.correct}/${d.tries}`;$("#ds").textC
 $("#drillEnter").onclick=()=>answerD(false);$("#drillBust").onclick=()=>answerD(true);
 $("#drillInput").addEventListener("keydown",e=>{if(e.key==="Enter")answerD(false)});
 $("#drillCount").onchange=startDrill;$("#resetDrill").onclick=()=>{d.correct=0;d.tries=0;d.streak=0;d.times=[];renderD();startDrill()};
+
+/* 3:2 blackjack payout trainer */
+let pt={correct:0,tries:0,streak:0,times:[],bet:5,start:0,locked:false};
+const commonBJAmounts=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,12.5,17.5,22.5,27.5,37.5,47.5];
+function nextCommonBet(){return Math.random()<.88?pick(commonBJAmounts.slice(0,20)):pick(commonBJAmounts.slice(20))}
+function startPayoutTrainer(){
+  if(payoutTrainer.classList.contains("hidden"))return;
+  pt.bet=nextCommonBet();pt.start=performance.now();pt.locked=false;
+  $("#payoutBetText").textContent=`$${money(pt.bet)}`;$("#payoutBetChips").innerHTML=chips(pt.bet);
+  $("#payoutTrainerInput").value="";$("#payoutTrainerFeedback").textContent="";setTimeout(()=>$("#payoutTrainerInput").focus(),40)
+}
+function renderPT(){
+  $("#pc").textContent=`${pt.correct}/${pt.tries}`;$("#ps").textContent=pt.streak;
+  $("#pa").textContent=pt.times.length?(pt.times.reduce((a,b)=>a+b,0)/pt.times.length).toFixed(1)+"s":"—"
+}
+function answerPT(){
+  if(pt.locked)return;
+  const val=parseFloat($("#payoutTrainerInput").value),expected=pt.bet*1.5;pt.tries++;
+  if(Math.abs(val-expected)<.001){
+    const t=(performance.now()-pt.start)/1000;pt.correct++;pt.streak++;pt.times.push(t);pt.locked=true;
+    $("#payoutTrainerFeedback").textContent=`Correct — add $${money(expected)}. Original $${money(pt.bet)} stays out.`;renderPT();setTimeout(startPayoutTrainer,650)
+  }else{pt.streak=0;$("#payoutTrainerFeedback").textContent="Not quite — pay one-and-a-half times the wager.";renderPT()}
+}
+$("#payoutTrainerEnter").onclick=answerPT;
+$("#payoutTrainerInput").addEventListener("keydown",e=>{if(e.key==="Enter")answerPT()});
+$("#payoutTrainerNext").onclick=startPayoutTrainer;
+
 shoe=newShoe();
 updateShoeUI();
 })();
