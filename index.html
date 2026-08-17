@@ -3,2225 +3,846 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#063d2d">
+<meta name="theme-color" content="#041d16">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Dealer Trainer">
 <title>Blackjack Dealer Trainer</title>
 <style>
 :root{
-  --felt:#075b3f; --felt2:#043c2d; --gold:#d6b35a; --cream:#f4ecd2;
-  --panel:rgba(3,18,14,.88); --line:rgba(255,255,255,.16); --soft:rgba(255,255,255,.08);
+  --felt:#07553c;
+  --felt-dark:#043426;
+  --gold:#d7b45b;
+  --panel:#031d17;
+  --panel2:#072b21;
+  --line:rgba(255,255,255,.16);
+  --muted:rgba(255,255,255,.70);
+  --good:#43d17c;
+  --bad:#ff7777;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#021811;color:white}
-button,input{font:inherit}
+html,body{margin:0;width:100%;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#02140f;color:#fff}
+button,input,select{font:inherit}
 button{touch-action:manipulation}
 .hidden{display:none!important}
-.app{
-  min-height:100vh;
-  background:
-    radial-gradient(circle at 50% 12%,rgba(255,255,255,.06),transparent 26rem),
-    linear-gradient(#063e2e,#02271d);
+.app{min-height:100dvh;background:radial-gradient(circle at 50% 20%,#0a6b4b 0,#043a2b 48%,#021c15 100%)}
+.top{
+  height:52px;display:flex;align-items:center;gap:10px;padding:calc(6px + env(safe-area-inset-top)) 12px 6px;
+  background:#021811;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.06)
 }
-.topbar{
-  position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:.7rem;
-  padding:calc(.6rem + env(safe-area-inset-top)) .8rem .6rem;
-  background:linear-gradient(rgba(1,18,13,.98),rgba(1,18,13,.82),transparent);
-  backdrop-filter:blur(10px)
-}
-.brand{font-weight:950;flex:1}
-.badge{font-size:.75rem;font-weight:900;border:1px solid var(--line);border-radius:999px;padding:.35rem .55rem;background:rgba(0,0,0,.25)}
-.icon{width:40px;height:40px;border:1px solid var(--line);border-radius:13px;background:rgba(0,0,0,.25);color:white;font-size:1.25rem}
-.screen{padding:.75rem .7rem calc(1rem + env(safe-area-inset-bottom));max-width:1180px;margin:auto}
-.hero{max-width:760px;margin:7vh auto 1rem;text-align:center}
-.hero h1{font-size:clamp(2rem,8vw,4rem);line-height:.95;margin:.2rem 0 .7rem}
-.hero p{opacity:.83;line-height:1.5}
-.modegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1.2rem}
+.back{width:40px;height:40px;border:1px solid var(--line);border-radius:13px;background:#071f19;color:#fff;font-size:25px}
+.brand{font-weight:950;flex:1;letter-spacing:.01em}
+.rulepill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;background:#071f19}
+.screen{max-width:1100px;margin:auto;padding:14px}
+.menu{height:calc(100dvh - 52px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hero{max-width:800px;margin:3vh auto 0;text-align:center}
+.hero h1{font-size:clamp(2.2rem,8vw,4.4rem);line-height:.93;margin:6px 0 12px}
+.hero p{color:var(--muted);line-height:1.45}
+.modegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:20px auto 50px}
 .mode{
-  border:1px solid var(--line);border-radius:24px;padding:1.1rem;text-align:left;color:white;
-  background:linear-gradient(145deg,rgba(0,0,0,.26),rgba(255,255,255,.06));box-shadow:0 12px 28px rgba(0,0,0,.28)
+  color:#fff;text-align:left;padding:18px;border:1px solid var(--line);border-radius:22px;
+  background:linear-gradient(145deg,rgba(0,0,0,.24),rgba(255,255,255,.06));min-height:175px;box-shadow:0 12px 30px rgba(0,0,0,.22)
 }
-.mode h2{margin:.2rem 0 .45rem}
-.primary,.secondary,.settle{
-  border:0;border-radius:14px;padding:.8rem .95rem;font-weight:900;cursor:pointer
+.mode h2{margin:4px 0 7px;font-size:1.35rem}.mode p{margin:0 0 18px;color:var(--muted);line-height:1.4}
+.eyebrow{font-size:11px;font-weight:950;letter-spacing:.12em;color:#e8ce88}
+.primary,.ghost,.action{
+  border:0;border-radius:11px;padding:10px 14px;font-weight:950;cursor:pointer
 }
-.primary{background:var(--gold);color:#172117}
-.secondary{background:rgba(255,255,255,.1);color:white;border:1px solid var(--line)}
-.toolbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
-.small{font-size:.78rem;opacity:.75}
-.table{
-  min-height:680px;border:4px solid #b5924b;border-bottom-width:14px;border-radius:46% 46% 15% 15% / 12% 12% 5% 5%;
-  background:
-    radial-gradient(ellipse at 50% 18%,rgba(255,255,255,.06),transparent 35%),
-    radial-gradient(ellipse at center,var(--felt),var(--felt2));
-  box-shadow:inset 0 0 0 6px #362514,inset 0 0 50px rgba(0,0,0,.36),0 14px 35px rgba(0,0,0,.35);
-  position:relative;overflow:hidden;padding:1rem .7rem 1.2rem
+.primary{background:var(--gold);color:#152016}.ghost,.action{background:#0a3025;color:#fff;border:1px solid var(--line)}
+.action{min-width:92px}
+.action:active,.primary:active,.ghost:active{transform:scale(.98)}
+.feedback{font-size:12px;min-height:18px;color:var(--muted)}
+.feedback.good{color:var(--good)}.feedback.bad{color:var(--bad)}
+
+/* -------------------- LIVE TABLE: rebuilt from scratch -------------------- */
+.liveScreen{
+  position:relative;
+  height:calc(100dvh - 52px);
+  max-width:none;
+  padding:0;
+  overflow:hidden;
 }
-.table:before{
+.rotate{
+  position:absolute;inset:0;z-index:1000;background:#031e17;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:30px
+}
+.rotate strong{font-size:22px}.rotate span{font-size:13px;color:var(--muted)}
+.liveBar{
+  position:absolute;left:0;right:0;top:0;height:42px;
+  display:flex;align-items:center;gap:7px;padding:5px 8px;background:rgba(2,24,17,.95);z-index:20
+}
+.liveBar button,.liveBar select{height:31px;font-size:12px;padding:5px 9px}
+.liveBar .shoe{font-size:11px;color:var(--muted);white-space:nowrap}
+
+.tableShell{
+  position:absolute;left:6px;right:6px;top:46px;bottom:58px;
+  border:3px solid #9d783d;border-bottom-width:7px;border-radius:34% 34% 8% 8% / 15% 15% 5% 5%;
+  overflow:hidden;background:
+    radial-gradient(ellipse at 50% 16%,rgba(255,255,255,.07),transparent 30%),
+    radial-gradient(ellipse at center,var(--felt),var(--felt-dark));
+  box-shadow:inset 0 0 0 5px #302112,inset 0 0 45px rgba(0,0,0,.32),0 12px 26px rgba(0,0,0,.28)
+}
+.tableShell:after{
   content:"BLACKJACK  •  PAYS 3 TO 2  •  DEALER HITS SOFT 17";
-  position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
-  width:82%;border:2px solid rgba(244,236,210,.16);border-radius:50%;padding:2.8rem .8rem;
-  text-align:center;letter-spacing:.11em;font-size:.75rem;font-weight:900;color:rgba(244,236,210,.23)
+  position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);
+  width:64%;text-align:center;color:rgba(244,236,210,.17);font-size:10px;font-weight:950;letter-spacing:.11em;
+  border:1px solid rgba(244,236,210,.13);border-radius:50%;padding:23px 8px;pointer-events:none
 }
-.dealer{position:relative;z-index:3;text-align:center;min-height:185px}
-.label{font-size:.73rem;font-weight:950;letter-spacing:.11em;text-transform:uppercase;opacity:.72}
-.cards{display:flex;justify-content:center;align-items:flex-start;min-height:86px;margin:.3rem 0}
+
+.dealerZone{
+  position:absolute;left:50%;top:6px;transform:translateX(-50%);
+  width:230px;height:92px;text-align:center;z-index:5
+}
+.zoneTitle{font-size:10px;font-weight:950;letter-spacing:.14em;color:rgba(255,255,255,.76)}
+.cards{display:flex;align-items:center;justify-content:center}
+.dealerCards{height:73px;margin-top:2px}
 .card{
-  width:50px;height:72px;background:#fff;color:#111;border-radius:7px;border:1px solid #ddd;
-  box-shadow:0 4px 8px rgba(0,0,0,.35);padding:3px;display:flex;flex-direction:column;justify-content:space-between;
-  font-size:.78rem;font-weight:950;margin-left:-14px
+  width:48px;height:68px;border-radius:6px;background:#fff;color:#111;border:1px solid #ddd;
+  box-shadow:0 3px 7px rgba(0,0,0,.34);padding:3px;display:flex;flex-direction:column;justify-content:space-between;
+  font-size:11px;font-weight:950;margin-left:-13px;position:relative
 }
-.card:first-child{margin-left:0}
-.card.red{color:#c31730}
-.card .big{font-size:1.55rem;align-self:center;line-height:1}
-.card.back{background:repeating-linear-gradient(45deg,#173367 0 4px,#f4f7fb 4px 6px,#a6202b 6px 10px);border:3px solid white}
-.players{
-  position:relative;z-index:4;display:grid;grid-template-columns:repeat(3,1fr);
-  gap:.55rem;margin-top:225px
+.card:first-child{margin-left:0}.card.red{color:#c71530}.card .big{font-size:21px;align-self:center;line-height:1}
+.card.back{background:repeating-linear-gradient(45deg,#173467 0 4px,#f3f5fb 4px 6px,#a51e2a 6px 10px);border:3px solid white}
+.card.horizontal{transform:rotate(90deg);margin-left:-3px;margin-right:15px;z-index:3}
+
+/* Fixed five player pods. They do NOT stretch vertically. */
+.seatRow{
+  position:absolute;left:12px;right:12px;bottom:10px;height:214px;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;z-index:6
 }
 .seat{
-  min-height:185px;border:1px solid var(--line);border-radius:20px;padding:.5rem .35rem;text-align:center;
-  background:linear-gradient(rgba(0,0,0,.10),rgba(0,0,0,.27))
+  height:214px;border:1px solid rgba(255,255,255,.14);border-radius:16px;
+  padding:5px;background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.29));
+  display:grid;grid-template-rows:18px 57px 31px minmax(80px,1fr);overflow:hidden
 }
-.seat.current{outline:3px solid var(--gold);box-shadow:0 0 0 4px rgba(214,179,90,.13)}
-.seat.done{opacity:.93}
-.seatTitle{font-size:.8rem;font-weight:950}
-.bet{font-size:.72rem;opacity:.8}
-.chips{display:flex;justify-content:center;align-items:flex-end;min-height:34px;flex-wrap:wrap;margin:.2rem 0}
+.seat.active{outline:3px solid var(--gold);box-shadow:0 0 0 4px rgba(215,180,91,.14)}
+.seat.empty{opacity:.24;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+.emptyCircle{width:54px;height:54px;border-radius:50%;border:1px dashed rgba(255,255,255,.45)}
+.seatTitle{font-size:11px;font-weight:950;text-align:center}
+.sideRow{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.side{
+  border:1px solid rgba(255,255,255,.17);border-radius:7px;background:rgba(0,0,0,.15);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;min-width:0
+}
+.side.top3{border-color:rgba(43,150,232,.55)}.side.ll{border-color:rgba(112,210,33,.55)}.side.p213{border-color:rgba(200,74,220,.55)}
+.side.current{outline:2px solid #ffd66d;background:rgba(255,214,109,.13)}
+.side .name{font-size:7px;font-weight:950;white-space:nowrap}.side .amt{font-size:8px;font-weight:950;margin-top:2px}
+.side .paid{font-size:6px;color:#ffe29b}
+.wagerArea{display:flex;align-items:center;justify-content:center;gap:4px;overflow:hidden}
+.betText{font-size:9px;color:rgba(255,255,255,.75)}
+.chips{display:flex;justify-content:center;align-items:center;min-height:20px}
 .chip{
-  width:30px;height:30px;border-radius:50%;border:3px dashed rgba(255,255,255,.9);
-  display:flex;align-items:center;justify-content:center;font-size:.54rem;font-weight:950;color:white;
-  text-shadow:0 1px 2px #000;box-shadow:0 2px 5px rgba(0,0,0,.3);margin-left:-7px
+  width:22px;height:22px;border-radius:50%;border:2px dashed rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:950;color:white;
+  text-shadow:0 1px 2px #000;box-shadow:0 2px 4px rgba(0,0,0,.3);margin-left:-6px
 }
 .chip:first-child{margin-left:0}
-.quarter{background:#9ba2a7;color:#111;text-shadow:none;border-color:#eef0f2}.white{background:#f5f5f5;color:#111;text-shadow:none;border-color:#555}
-.pink{background:#e957a1}.redc{background:#c62929}.green{background:#18834d}.black{background:#151515}.purple{background:#6d36a5}.orange{background:#e4771a}
-.handWrap{display:flex;justify-content:center;gap:.25rem;flex-wrap:wrap}
-.hand{min-width:100px;padding:.2rem;border-radius:12px}
-.hand.active{background:rgba(0,0,0,.22);outline:2px solid rgba(214,179,90,.7)}
-.actionTag{font-size:.67rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;min-height:1em;color:#f8dda0}
-.panel{
-  position:relative;z-index:10;margin-top:.7rem;background:var(--panel);border:1px solid var(--line);
-  border-radius:20px;padding:.8rem;box-shadow:0 12px 30px rgba(0,0,0,.3)
+.c025{background:#a6adb1;color:#111;text-shadow:none;border-color:#fff}.c1{background:#f2f2f2;color:#111;text-shadow:none;border-color:#666}
+.c25{background:#e957a1}.c5{background:#c62b2b}.c25d{background:#16844d}.c100{background:#151515}.c500{background:#6e38a7}.c1000{background:#e47a1f}
+.handArea{display:flex;align-items:end;justify-content:center;gap:2px;min-height:0}
+.hand{min-width:0;text-align:center}.playerCards{height:76px;align-items:end}
+.playerCards .card{width:51px;height:72px;font-size:11px}
+.playerCards .card .big{font-size:22px}.handTag{font-size:7px;font-weight:950;color:#f4d88b;min-height:9px}
+.bjMark{font-size:7px;color:#f2d57d;font-weight:950}
+
+.hud{
+  position:absolute;left:6px;right:6px;bottom:calc(4px + env(safe-area-inset-bottom));height:49px;
+  border:1px solid var(--line);border-radius:12px;background:rgba(2,24,18,.97);z-index:30;
+  display:grid;grid-template-columns:minmax(150px,31%) minmax(0,69%);align-items:center;padding:5px 7px;gap:7px
 }
-.status{font-weight:950;font-size:1rem;line-height:1.35}
-.substatus{font-size:.78rem;opacity:.75;margin-top:.25rem}
-.entry{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin-top:.65rem}
-.entry input{width:110px;border:0;border-radius:12px;padding:.78rem;background:#fff;color:#111;font-weight:900;font-size:1rem}
-.settlementGrid{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:.45rem;margin-top:.7rem}
-.settle{background:rgba(255,255,255,.10);color:white;border:1px solid var(--line)}
-.settle.done{opacity:.35}
-.payoutLine{margin-top:.5rem;font-size:.83rem;opacity:.85}
-.roundSummary{margin-top:.55rem;font-size:.78rem;opacity:.78}
-.drill{
-  max-width:680px;margin:5vh auto;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:25px;padding:1.1rem;text-align:center
+.hudText{font-size:12px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hudControls{display:flex;justify-content:flex-end;gap:5px;min-width:0}
+.hudControls input{width:78px;height:36px;border:0;border-radius:9px;padding:7px;font-weight:950}
+.hudControls button{height:36px;padding:6px 11px;font-size:11px}
+.hudControls .action{flex:1;max-width:140px}
+.smallNote{display:none}
+
+/* payout tray: small and independent of table */
+.payTray{
+  position:absolute;left:6px;right:6px;bottom:calc(4px + env(safe-area-inset-bottom));height:78px;
+  background:rgba(2,24,18,.99);border:1px solid var(--line);border-radius:12px;z-index:50;
+  display:grid;grid-template-columns:130px minmax(0,1fr) 190px;gap:7px;align-items:center;padding:6px 8px
 }
-.timer{font-size:3rem;font-weight:1000;margin:.35rem 0}
-.timer.low{color:#ff6b6b}
-.drillhand{display:flex;justify-content:center;min-height:135px;align-items:center;margin:1rem 0}
-.drillhand .card{width:72px;height:105px;font-size:1rem;margin-left:-18px}
-.drillhand .card .big{font-size:2.2rem}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.7rem 0}
-.stat{background:var(--soft);border-radius:14px;padding:.65rem .3rem}
-.stat strong{display:block;font-size:1.18rem}
-select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
-@media(min-width:760px){
-  .players{grid-template-columns:repeat(6,1fr);margin-top:250px}
-  .table{min-height:730px;padding-inline:1.1rem}
-  .seat{min-height:205px}
-  .card{width:55px;height:80px}
+.payTrayTitle{font-size:11px;font-weight:950}.payTrayTitle span{display:block;font-size:8px;color:var(--muted);margin-top:3px;font-weight:600}
+.rack{display:grid;grid-template-columns:repeat(8,1fr);gap:2px}
+.rackBtn{background:transparent;border:0;color:#fff;padding:1px;font-size:7px;font-weight:900}
+.rackBtn .chip{margin:auto;width:28px;height:28px;font-size:7px}
+.trayRight{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.selected{font-size:10px;font-weight:950;border:1px solid var(--line);border-radius:999px;padding:5px 7px;white-space:nowrap}
+.trayRight button{height:34px;font-size:10px;padding:5px 8px}
+
+.statsModal{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px}
+.statsCard{width:min(430px,94vw);background:#05271d;border:1px solid var(--line);border-radius:18px;padding:14px}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
+.stat{background:rgba(255,255,255,.07);border-radius:11px;padding:8px}.stat strong{display:block;font-size:18px}
+
+/* -------------------- drills -------------------- */
+.drillCard{max-width:650px;margin:4vh auto;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:24px;padding:18px;text-align:center}
+.timer{font-size:50px;font-weight:1000}.timer.low{color:#ff7474}
+.drillCards{height:145px;display:flex;align-items:center;justify-content:center}
+.drillCards .card{width:74px;height:105px;font-size:15px;margin-left:-18px}.drillCards .card .big{font-size:32px}
+.drillStats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}
+.drillInput{display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap}
+.drillInput input{width:110px;padding:10px;border:0;border-radius:10px;font-weight:950}
+.payoutSpot{width:210px;height:150px;border:2px solid rgba(215,180,91,.55);border-radius:50%;margin:16px auto;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.payoutSpot strong{font-size:30px}
+
+/* phone portrait only: ask user to rotate for live mode */
+@media (orientation:portrait) and (max-width:900px){
+  .liveScreen .rotate{display:flex!important}
 }
-@media(max-width:520px){
-  .table{min-height:760px;border-radius:43% 43% 10% 10% / 9% 9% 4% 4%}
-  .players{grid-template-columns:repeat(2,1fr);margin-top:235px}
-  .seat{min-height:160px}
-}
-
-/* -------- Phone table layout: everything stays on one screen -------- */
-@media (max-width: 600px){
-  html,body{height:100%;overflow:hidden}
-  .app{height:100dvh;min-height:100dvh;overflow:hidden}
-  .topbar{
-    height:50px;
-    min-height:50px;
-    padding:calc(4px + env(safe-area-inset-top)) 7px 4px;
-  }
-  .brand{font-size:.92rem}
-  .badge{font-size:.62rem;padding:.24rem .42rem}
-  .icon{width:34px;height:34px;border-radius:10px}
-
-  #sim.screen{
-    height:calc(100dvh - 50px);
-    padding:2px 4px calc(3px + env(safe-area-inset-bottom));
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-    max-width:none;
-  }
-  #sim.hidden{display:none!important}
-
-  #sim .toolbar{
-    flex:0 0 34px;
-    height:34px;
-    margin:0 0 2px;
-    gap:5px;
-    overflow:hidden;
-  }
-  #sim .toolbar .primary{
-    padding:.38rem .7rem;
-    border-radius:10px;
-    font-size:.76rem;
-  }
-  #sim .toolbar .small{font-size:.62rem;white-space:nowrap}
-
-  #sim .table{
-    flex:1 1 auto;
-    min-height:0;
-    height:auto;
-    padding:4px 4px 5px;
-    border-width:3px;
-    border-bottom-width:7px;
-    border-radius:28% 28% 7% 7% / 8% 8% 3% 3%;
-    overflow:hidden;
-  }
-  #sim .table:before{
-    top:43%;
-    width:78%;
-    padding:1.2rem .35rem;
-    font-size:.47rem;
-    letter-spacing:.07em;
-  }
-
-  #sim .dealer{
-    min-height:76px;
-    height:76px;
-  }
-  #sim .label{font-size:.57rem}
-  #sim .dealer .cards{
-    min-height:54px;
-    margin:1px 0;
-  }
-  #sim .dealer .actionTag{font-size:.54rem}
-
-  #sim .players{
-    position:absolute;
-    left:4px; right:4px; bottom:4px;
-    margin:0;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    grid-auto-rows:minmax(88px,auto);
-    gap:3px;
-    align-items:end;
-  }
-  #sim .seat{
-    min-height:88px;
-    height:auto;
-    padding:2px 2px;
-    border-radius:11px;
-    overflow:hidden;
-  }
-  #sim .seatTitle{font-size:.60rem;line-height:1.05}
-  #sim .bet{font-size:.53rem;line-height:1.05}
-  #sim .chips{
-    min-height:17px;
-    height:17px;
-    margin:1px 0;
-  }
-  #sim .chip{
-    width:18px;height:18px;
-    border-width:2px;
-    font-size:.35rem;
-    margin-left:-5px;
-  }
-  #sim .handWrap{gap:1px}
-  #sim .hand{
-    min-width:0;
-    width:auto;
-    padding:0;
-    border-radius:7px;
-  }
-  #sim .hand .cards{
-    min-height:43px;
-    margin:0;
-  }
-  #sim .actionTag{
-    font-size:.45rem;
-    min-height:.55em;
-    line-height:1;
-  }
-
-  #sim .card{
-    width:30px;
-    height:43px;
-    border-radius:4px;
-    padding:2px;
-    font-size:.48rem;
-    margin-left:-10px;
-    box-shadow:0 2px 4px rgba(0,0,0,.32);
-  }
-  #sim .card .big{font-size:.92rem}
-  #sim .card.back{border-width:2px}
-
-  #sim .panel{
-    flex:0 0 122px;
-    height:122px;
-    margin-top:3px;
-    padding:6px;
-    border-radius:13px;
-    overflow:hidden;
-  }
-  #sim .status{
-    font-size:.78rem;
-    line-height:1.1;
-    min-height:17px;
-  }
-  #sim .substatus{
-    font-size:.58rem;
-    line-height:1.1;
-    margin-top:2px;
-    min-height:13px;
-  }
-  #sim .entry{
-    margin-top:5px;
-    gap:4px;
-    flex-wrap:nowrap;
-  }
-  #sim .entry input{
-    width:83px;
-    padding:.48rem .5rem;
-    border-radius:9px;
-    font-size:.82rem;
-  }
-  #sim .primary,#sim .secondary,#sim .settle{
-    padding:.48rem .55rem;
-    border-radius:9px;
-    font-size:.68rem;
-  }
-  #sim .settlementGrid{
-    grid-template-columns:repeat(4,1fr);
-    gap:3px;
-    margin-top:5px;
-  }
-  #sim .settle{padding:.48rem .18rem;font-size:.58rem}
-  #sim .payoutLine{margin-top:3px;font-size:.58rem}
-  #sim .roundSummary{margin-top:2px;font-size:.55rem;line-height:1.05}
-  #sim #collectCards{margin-top:5px!important;width:100%}
-
-  /* Keep the speed drill independently scroll-free and compact too. */
-  #drill.screen{
-    height:calc(100dvh - 50px);
-    overflow:auto;
-    padding-top:3px;
-  }
-}
-
-
-/* Blackjack procedure visuals */
-.card.horizontal{
-  transform:rotate(90deg);
-  margin-left:-3px;
-  margin-right:12px;
-  position:relative;
-  z-index:2;
-}
-.betStacks{
-  display:flex;
-  justify-content:center;
-  align-items:flex-end;
-  gap:4px;
-  min-height:34px;
-  flex-wrap:wrap;
-}
-.betGroup{
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  gap:2px;
-}
-.betGroup .chips{margin:0}
-.secondBet{transform:translateY(-1px)}
-@media(max-width:600px){
-  #sim .betStacks{min-height:17px;height:17px;gap:2px;flex-wrap:nowrap}
-  #sim .betGroup{gap:1px;min-width:0}
-  #sim .betGroup .chips{min-height:17px;height:17px;margin:0}
-  #sim .card.horizontal{margin-left:-5px;margin-right:7px}
-}
-
-
-/* v6 dealer-training additions */
-.rackPanel{margin-top:4px}
-.rack{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-  margin-top:6px;
-}
-.rackChip{
-  border:0;
-  background:transparent;
-  color:white;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:3px;
-  font-size:.67rem;
-  font-weight:900;
-}
-.rackChip .chip{margin:0;width:36px;height:36px;font-size:.58rem}
-.rackFooter{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:7px}
-.selectedChips{display:flex;gap:2px;align-items:center;min-height:32px;flex-wrap:wrap}
-.betGroup{position:relative}
-.insuranceStack{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  margin-top:2px;
-  padding-top:2px;
-  border-top:1px solid rgba(255,255,255,.25);
-}
-.insuranceTag{font-size:.45rem;opacity:.8;margin-left:2px}
-.blackjackMark{
-  font-size:.52rem;font-weight:950;letter-spacing:.06em;color:#f6d77b;
-}
-.discardTray{
-  position:absolute;right:7px;top:7px;
-  width:44px;height:27px;border:2px solid rgba(255,255,255,.35);
-  border-radius:5px;background:rgba(0,0,0,.22);
-  font-size:.45rem;font-weight:900;display:flex;align-items:center;justify-content:center;
-}
-.cutCard{
-  position:absolute;left:7px;top:7px;
-  border-radius:5px;background:#f2d84a;color:#111;
-  padding:4px 5px;font-size:.45rem;font-weight:950;
-}
-.modal{
-  position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.68);
-  display:flex;align-items:center;justify-content:center;padding:14px;
-}
-.modalCard{
-  width:min(92vw,430px);background:#06271d;border:1px solid rgba(255,255,255,.18);
-  border-radius:20px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.5);
-}
-.statsBody{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
-.statsBody .stat{padding:.7rem}
-@media(max-width:600px){
-  #sim .toolbar select{font-size:.6rem;padding:.25rem}
-  #sim .toolbar #statsBtn{padding:.32rem .5rem;font-size:.6rem}
-  #sim .toolbar #shoeStatus{display:none}
-  #sim .rackPanel{
-    position:absolute;
-    left:4px;right:4px;bottom:calc(3px + env(safe-area-inset-bottom));
-    z-index:40;height:150px;margin:0;padding:6px;
-  }
-  #sim .rack{
-    grid-template-columns:repeat(8,1fr);
-    gap:1px;
-    margin-top:4px;
-  }
-  #sim .rackChip{font-size:.42rem;gap:1px}
-  #sim .rackChip .chip{width:25px;height:25px;font-size:.4rem;border-width:2px}
-  #sim .rackFooter{margin-top:4px;gap:3px}
-  #sim .rackFooter .badge{font-size:.52rem}
-  #sim .rackFooter button{font-size:.58rem;padding:.42rem .45rem}
-}
-
-
-/* v7 wager + added payout display */
-.betGroup{
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  gap:4px;
-}
-.wagerSide,.paidSide{
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  gap:1px;
-  position:relative;
-}
-.paidSide{
-  padding-left:4px;
-  border-left:1px solid rgba(255,255,255,.25);
-}
-.paidTag{
-  font-size:.42rem;
-  font-weight:950;
-  opacity:.75;
-  margin-left:1px;
-}
-@media(max-width:600px){
-  #sim .betGroup{gap:2px}
-  #sim .paidSide{padding-left:2px}
-  #sim .paidTag{font-size:.34rem}
-}
-
-
-/* v8 landscape layout and poker side bets */
-.rotateNotice{position:fixed;inset:0;z-index:9999;background:#031f18;display:flex;align-items:center;justify-content:center;text-align:center;padding:2rem}
-.rotateNotice span{font-size:.8rem;opacity:.72}
-.sideBetRow{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:1px 0}
-.sideSpot{min-width:0;border:1px solid rgba(255,255,255,.16);border-radius:6px;padding:2px 1px;background:rgba(0,0,0,.14);font-size:.43rem;line-height:1;min-height:27px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.sideSpot span{font-weight:950}.sideSpot b{font-size:.46rem;margin-top:1px}.sideSpot em{opacity:.32;font-style:normal}.sideSpot small{font-size:.36rem;color:#ffe39a}
-.llSpot{border-color:rgba(116,215,28,.48)}.topSpot{border-color:rgba(39,149,231,.48)}.p213Spot{border-color:rgba(202,74,221,.48)}
-.activeSide{outline:2px solid #ffd76e;background:rgba(255,215,110,.12)}
-.miniChips{min-height:11px!important;height:11px!important;margin:1px 0 0!important}.miniChips .chip{width:12px!important;height:12px!important;font-size:.25rem!important;border-width:1px!important}
-.emptySeat{opacity:.32;display:flex;flex-direction:column;align-items:center;justify-content:center}.emptyCircle{width:34px;height:34px;border-radius:50%;border:1px dashed rgba(255,255,255,.4);margin-top:5px}
-.payoutTrainerCard{max-width:560px}.payoutBetStage{display:flex;justify-content:center;margin:1rem 0}.payoutSpot{min-width:190px;border:2px solid rgba(214,179,90,.58);border-radius:50%;padding:1rem;background:rgba(0,0,0,.15)}
-.payoutSpot strong{font-size:1.7rem}.payoutBigChips .chip{width:42px;height:42px;font-size:.62rem}
-
-@media (orientation:landscape) and (max-height:600px){
-  html,body{height:100%;overflow:hidden}.app{height:100dvh;min-height:100dvh;overflow:hidden}
-  .topbar{height:32px;min-height:32px;padding:1px 6px}.brand{font-size:.75rem}.badge{font-size:.5rem;padding:.15rem .3rem}.icon{width:27px;height:27px}
-  #sim.screen{height:calc(100dvh - 32px);padding:1px 3px 2px;max-width:none;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 205px;grid-template-rows:28px minmax(0,1fr);gap:2px}
-  #sim .toolbar{grid-column:1/3;height:28px;margin:0;overflow:hidden}#sim .toolbar .primary,#sim .toolbar .secondary{padding:.25rem .43rem;font-size:.54rem}#sim .toolbar .small{font-size:.48rem}#sim .toolbar select{font-size:.48rem;padding:.18rem}
-  #sim .table{grid-column:1;grid-row:2;height:100%;min-height:0;padding:2px;border-width:2px;border-bottom-width:5px;border-radius:24% 24% 6% 6%/9% 9% 3% 3%}
-  #sim .dealer{height:58px;min-height:58px}#sim .dealer .cards{min-height:43px;height:43px;margin:0}#sim .dealer .card{width:29px;height:41px;font-size:.43rem}#sim .dealer .card .big{font-size:.85rem}
-  #sim .players{position:absolute;left:3px;right:3px;bottom:3px;margin:0;display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:112px;gap:2px}
-  #sim .seat{min-height:110px;height:110px;padding:2px;border-radius:8px;overflow:hidden}#sim .seatTitle{font-size:.48rem}
-  #sim .sideBetRow{gap:1px}#sim .sideSpot{font-size:.31rem;min-height:23px;padding:1px}#sim .sideSpot b{font-size:.33rem}#sim .sideSpot small{font-size:.28rem}
-  #sim .bet{font-size:.42rem}#sim .betStacks{min-height:13px;height:13px}#sim .chip{width:15px;height:15px;font-size:.28rem;border-width:1px}
-  #sim .hand .cards{min-height:36px;height:36px}#sim .hand .card{width:25px;height:36px;font-size:.36rem;margin-left:-8px}#sim .hand .card .big{font-size:.72rem}
-  #sim .actionTag,#sim .blackjackMark{font-size:.33rem}
-  #sim .panel{grid-column:2;grid-row:2;height:100%;margin:0;padding:5px;border-radius:9px;overflow:hidden}#sim .status{font-size:.62rem;line-height:1.04}#sim .substatus{font-size:.45rem;line-height:1.04}
-  #sim .entry{margin-top:3px;gap:2px}#sim .entry input{width:62px;padding:.32rem;font-size:.62rem}#sim .primary,#sim .secondary,#sim .settle{padding:.33rem .34rem;font-size:.5rem}
-  #sim .settlementGrid{grid-template-columns:1fr 1fr;gap:2px;margin-top:4px}#sim .payoutLine,#sim .roundSummary{font-size:.43rem}
-  #sim .rackPanel{position:absolute;right:3px;top:61px;bottom:2px;left:auto;width:205px;height:auto;z-index:45}#sim .rack{grid-template-columns:repeat(4,1fr)}#sim .rackChip .chip{width:22px;height:22px}
-}
-
-
-/* ============================================================
-   VERSION 10 UX REDESIGN
-   Live dealer mode uses the full landscape width.
-   Controls sit in a bottom dock instead of stealing table width.
-   ============================================================ */
-
-/* Main menu must always be scrollable so every training mode is reachable. */
-#menu.screen{
-  height:calc(100dvh - 50px);
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain;
-  padding-bottom:calc(28px + env(safe-area-inset-bottom));
-}
-#menu .hero{margin:3vh auto 1.5rem}
-#menu .modegrid{padding-bottom:2rem}
-
-/* Drill and payout pages can also scroll independently if a small phone needs it. */
-#drill.screen,#payoutTrainer.screen{
-  height:calc(100dvh - 50px);
-  overflow-y:auto !important;
-  -webkit-overflow-scrolling:touch;
-}
-
-/* Better side-bet labels outside the smallest landscape view. */
-.sideSpot span{font-size:.92em}
-.sideSpot b{font-weight:950}
-.activeSide{
-  box-shadow:0 0 0 2px rgba(255,215,110,.32),0 0 12px rgba(255,215,110,.20);
-}
-
-/* Landscape phone/tablet live dealer view. */
-@media (orientation:landscape) and (max-height:650px){
-  html,body{height:100%;overflow:hidden}
-  .app{height:100dvh;min-height:100dvh;overflow:hidden}
-
-  .topbar{
-    height:30px;min-height:30px;
-    padding:1px 8px;
-    background:rgba(1,18,13,.96);
-  }
-  .brand{font-size:.78rem}
-  .badge{font-size:.52rem;padding:.15rem .34rem}
-  .icon{width:27px;height:27px;border-radius:9px}
-
-  /* Full-width three-row layout:
-     row 1 toolbar, row 2 table, row 3 dealer controls */
-  #sim.screen{
-    height:calc(100dvh - 30px);
-    width:100%;
-    max-width:none;
-    padding:2px 5px calc(2px + env(safe-area-inset-bottom));
-    overflow:hidden;
-    display:grid;
-    grid-template-columns:1fr;
-    grid-template-rows:30px minmax(0,1fr) 82px;
-    gap:3px;
-  }
-
-  #sim .toolbar{
-    grid-row:1;
-    width:100%;
-    height:30px;
-    margin:0;
-    padding:0 2px;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    overflow:hidden;
-  }
-  #sim .toolbar .primary,#sim .toolbar .secondary{
-    padding:.28rem .55rem;
-    border-radius:9px;
-    font-size:.58rem;
-  }
-  #sim .toolbar .small{font-size:.52rem}
-  #sim .toolbar select{font-size:.52rem;padding:.2rem .3rem}
-
-  /* Table uses essentially the entire screen width. */
-  #sim .table{
-    grid-row:2;
-    width:100%;
-    height:100%;
-    min-height:0;
-    padding:3px 8px 4px;
-    border-width:2px;
-    border-bottom-width:5px;
-    border-radius:28% 28% 7% 7% / 12% 12% 4% 4%;
-    overflow:hidden;
-  }
-  #sim .table:before{
-    top:43%;
-    width:70%;
-    padding:1rem .5rem;
-    font-size:.48rem;
-    letter-spacing:.08em;
-  }
-
-  /* Bigger dealer cards. */
-  #sim .dealer{
-    height:70px;
-    min-height:70px;
-  }
-  #sim .label{font-size:.52rem}
-  #sim .dealer .cards{
-    height:52px;
-    min-height:52px;
-    margin:0;
-  }
-  #sim .dealer .card{
-    width:37px;
-    height:52px;
-    margin-left:-10px;
-    font-size:.52rem;
-    border-radius:5px;
-  }
-  #sim .dealer .card .big{font-size:1.08rem}
-  #sim .dealer .actionTag{font-size:.45rem}
-
-  /* Five fixed seats spread across the width, not compressed by a side panel. */
-  #sim .players{
-    position:absolute;
-    left:8px;right:8px;bottom:4px;
-    margin:0;
-    display:grid;
-    grid-template-columns:repeat(5,minmax(0,1fr));
-    grid-auto-rows:142px;
-    gap:6px;
-    align-items:end;
-  }
-  #sim .seat{
-    height:142px;
-    min-height:142px;
-    padding:4px 3px;
-    border-radius:11px;
-    overflow:hidden;
-    background:linear-gradient(rgba(0,0,0,.11),rgba(0,0,0,.31));
-  }
-  #sim .seat.current{
-    outline:2px solid var(--gold);
-    box-shadow:0 0 0 3px rgba(214,179,90,.13);
-  }
-  #sim .seatTitle{
-    font-size:.58rem;
-    line-height:1;
-    margin-bottom:2px;
-  }
-
-  /* Side bet boxes are now actually readable. */
-  #sim .sideBetRow{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:2px;
-    margin:2px 0 3px;
-  }
-  #sim .sideSpot{
-    min-height:31px;
-    padding:2px 1px;
-    font-size:.39rem;
-    border-radius:6px;
-  }
-  #sim .sideSpot b{font-size:.42rem;margin-top:1px}
-  #sim .sideSpot small{font-size:.31rem}
-  #sim .miniChips{height:13px!important;min-height:13px!important}
-  #sim .miniChips .chip{
-    width:14px!important;height:14px!important;
-    font-size:.27rem!important;
-  }
-
-  #sim .bet{
-    font-size:.5rem;
-    line-height:1;
-    margin-top:1px;
-  }
-  #sim .betStacks{
-    min-height:18px;
-    height:18px;
-    margin:1px 0;
-  }
-  #sim .chip{
-    width:19px;height:19px;
-    border-width:1px;
-    font-size:.34rem;
-  }
-
-  /* Bigger player cards for faster visual totaling. */
-  #sim .handWrap{gap:2px}
-  #sim .hand .cards{
-    height:48px;
-    min-height:48px;
-    margin:0;
-  }
-  #sim .hand .card{
-    width:34px;
-    height:48px;
-    margin-left:-10px;
-    font-size:.48rem;
-    border-radius:5px;
-  }
-  #sim .hand .card .big{font-size:.96rem}
-  #sim .card.horizontal{margin-right:8px}
-  #sim .actionTag,#sim .blackjackMark{
-    font-size:.4rem;
-    line-height:1;
-  }
-
-  /* Controls are a bottom dock across the full width. */
-  #sim .panel{
-    grid-row:3;
-    width:100%;
-    height:82px;
-    margin:0;
-    padding:6px 9px;
-    border-radius:12px;
-    overflow:hidden;
-    display:grid;
-    grid-template-columns:minmax(210px,1.1fr) minmax(280px,1.7fr);
-    grid-template-rows:auto 1fr;
-    column-gap:10px;
-    align-items:center;
-  }
-  #sim .status{
-    grid-column:1;
-    grid-row:1;
-    font-size:.69rem;
-    line-height:1.05;
-    white-space:normal;
-  }
-  #sim .substatus{
-    grid-column:1;
-    grid-row:2;
-    font-size:.52rem;
-    line-height:1.12;
-    margin:2px 0 0;
-    align-self:start;
-  }
-  #sim #totalEntry,#sim #settleArea,#sim #collectCards{
-    grid-column:2;
-    grid-row:1 / 3;
-    align-self:center;
-  }
-  #sim .entry{
-    margin:0;
-    justify-content:center;
-    gap:5px;
-    flex-wrap:nowrap;
-  }
-  #sim .entry input{
-    width:82px;
-    padding:.48rem .5rem;
-    font-size:.76rem;
-    border-radius:9px;
-  }
-  #sim .primary,#sim .secondary,#sim .settle{
-    padding:.47rem .62rem;
-    border-radius:9px;
-    font-size:.62rem;
-  }
-  #sim .settlementGrid{
-    grid-template-columns:repeat(4,minmax(72px,1fr));
-    gap:4px;
-    margin:0;
-  }
-  #sim .payoutLine{
-    text-align:center;
-    font-size:.53rem;
-    margin-top:3px;
-  }
-  #sim .roundSummary{
-    position:absolute;
-    left:10px;
-    bottom:3px;
-    font-size:.44rem;
-  }
-
-  /* Chip rack overlays the control dock rather than shrinking the table. */
-  #sim .rackPanel{
-    position:absolute;
-    left:5px;right:5px;
-    bottom:calc(2px + env(safe-area-inset-bottom));
-    width:auto;
-    height:110px;
-    margin:0;
-    padding:6px 9px;
-    z-index:50;
-    border-radius:12px;
-  }
-  #sim .rackPanel .status{font-size:.64rem}
-  #sim .rackPanel .substatus{font-size:.48rem}
-  #sim .rack{
-    grid-template-columns:repeat(8,1fr);
-    gap:3px;
-    margin-top:4px;
-  }
-  #sim .rackChip{font-size:.42rem}
-  #sim .rackChip .chip{
-    width:27px;height:27px;
-    font-size:.42rem;
-  }
-  #sim .rackFooter{
-    margin-top:4px;
-    gap:4px;
-    justify-content:center;
-  }
-
-  /* Empty seats stay visible but unobtrusive. */
-  #sim .emptySeat{opacity:.22}
-  #sim .emptyCircle{width:44px;height:44px}
-}
-
-/* On landscape phones with a little more height, enlarge the table further. */
-@media (orientation:landscape) and (min-height:430px) and (max-height:650px){
-  #sim.screen{grid-template-rows:32px minmax(0,1fr) 88px}
-  #sim .players{grid-auto-rows:158px}
-  #sim .seat{height:158px;min-height:158px}
-  #sim .hand .card{width:38px;height:54px}
-  #sim .hand .cards{height:54px;min-height:54px}
-}
-
-
-/* ============================================================
-   VERSION 11 — iPHONE SAFARI LANDSCAPE HARD FIX
-   ============================================================ */
 @media (orientation:landscape){
-  body.liveDealerMode{
-    position:fixed !important;
-    inset:0 !important;
-    width:100vw !important;
-    min-width:100vw !important;
-    max-width:none !important;
-    height:100dvh !important;
-    min-height:100dvh !important;
-    margin:0 !important;
-    padding:0 !important;
-    overflow:hidden !important;
-  }
-  body.liveDealerMode .app{
-    position:fixed !important;
-    inset:0 !important;
-    width:100vw !important;
-    min-width:100vw !important;
-    max-width:none !important;
-    height:100dvh !important;
-    min-height:100dvh !important;
-    margin:0 !important;
-    padding:0 !important;
-    overflow:hidden !important;
-  }
-  body.liveDealerMode .topbar{
-    position:absolute !important;
-    top:0 !important;
-    left:0 !important;
-    right:0 !important;
-    width:100vw !important;
-    max-width:none !important;
-    height:32px !important;
-    min-height:32px !important;
-    margin:0 !important;
-    padding:2px 8px !important;
-  }
-  body.liveDealerMode #sim.screen{
-    position:absolute !important;
-    top:32px !important;
-    left:0 !important;
-    right:0 !important;
-    bottom:0 !important;
-    width:100vw !important;
-    min-width:0 !important;
-    max-width:none !important;
-    height:calc(100dvh - 32px) !important;
-    min-height:0 !important;
-    margin:0 !important;
-    padding:3px 6px calc(3px + env(safe-area-inset-bottom)) !important;
-    overflow:hidden !important;
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) !important;
-    grid-template-rows:30px minmax(0,1fr) 84px !important;
-    gap:3px !important;
-  }
-  body.liveDealerMode #sim .toolbar{
-    grid-row:1 !important;
-    grid-column:1 !important;
-    width:100% !important;
-    min-width:0 !important;
-    max-width:none !important;
-    height:30px !important;
-    margin:0 !important;
-    padding:0 2px !important;
-    display:flex !important;
-    align-items:center !important;
-    flex-direction:row !important;
-    flex-wrap:nowrap !important;
-    overflow:hidden !important;
-  }
-  body.liveDealerMode #sim .table{
-    grid-row:2 !important;
-    grid-column:1 !important;
-    position:relative !important;
-    width:100% !important;
-    min-width:0 !important;
-    max-width:none !important;
-    height:100% !important;
-    min-height:0 !important;
-    margin:0 !important;
-    overflow:hidden !important;
-  }
-  body.liveDealerMode #sim .panel{
-    grid-row:3 !important;
-    grid-column:1 !important;
-    position:relative !important;
-    width:100% !important;
-    min-width:0 !important;
-    max-width:none !important;
-    height:84px !important;
-    min-height:84px !important;
-    margin:0 !important;
-    padding:6px 9px !important;
-    overflow:hidden !important;
-    display:grid !important;
-    grid-template-columns:minmax(180px,1fr) minmax(280px,1.65fr) !important;
-    grid-template-rows:auto 1fr !important;
-    column-gap:10px !important;
-  }
-  body.liveDealerMode #sim .players{
-    position:absolute !important;
-    left:8px !important;
-    right:8px !important;
-    bottom:4px !important;
-    width:auto !important;
-    max-width:none !important;
-    margin:0 !important;
-    display:grid !important;
-    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
-    gap:5px !important;
-  }
-  body.liveDealerMode #sim .rackPanel{
-    position:absolute !important;
-    left:6px !important;
-    right:6px !important;
-    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
-    width:auto !important;
-    max-width:none !important;
-    height:112px !important;
-    margin:0 !important;
-    z-index:100 !important;
-  }
-}
-@media (orientation:landscape) and (max-height:390px){
-  body.liveDealerMode #sim.screen{
-    grid-template-rows:28px minmax(0,1fr) 72px !important;
-  }
-  body.liveDealerMode #sim .toolbar{
-    height:28px !important;
-    min-height:28px !important;
-  }
-  body.liveDealerMode #sim .panel{
-    height:72px !important;
-    min-height:72px !important;
-    padding:4px 7px !important;
-  }
-  body.liveDealerMode #sim .players{
-    grid-auto-rows:120px !important;
-  }
-  body.liveDealerMode #sim .seat{
-    height:120px !important;
-    min-height:120px !important;
-  }
+  .liveScreen .rotate{display:none!important}
 }
 
-
-/* ============================================================
-   VERSION 12 — CONTROL DOCK DECOUPLED FROM TABLE
-   The prompt/action box is now a fixed overlay. Its content
-   can no longer resize or push the blackjack table.
-   ============================================================ */
-@media (orientation:landscape) {
-  body.liveDealerMode #sim.screen{
-    display:block !important;
-    position:absolute !important;
-    top:32px !important;
-    left:0 !important;
-    right:0 !important;
-    bottom:0 !important;
-    width:100vw !important;
-    height:calc(100dvh - 32px) !important;
-    min-width:0 !important;
-    max-width:none !important;
-    min-height:0 !important;
-    margin:0 !important;
-    padding:0 !important;
-    overflow:hidden !important;
-  }
-
-  body.liveDealerMode #sim .toolbar{
-    position:absolute !important;
-    top:0 !important;
-    left:6px !important;
-    right:6px !important;
-    width:auto !important;
-    height:30px !important;
-    min-height:30px !important;
-    margin:0 !important;
-    padding:0 2px !important;
-    display:flex !important;
-    align-items:center !important;
-    flex-wrap:nowrap !important;
-    gap:5px !important;
-    overflow:hidden !important;
-    z-index:30 !important;
-  }
-
-  body.liveDealerMode #sim .table{
-    position:absolute !important;
-    top:33px !important;
-    left:6px !important;
-    right:6px !important;
-    bottom:88px !important;
-    width:auto !important;
-    height:auto !important;
-    min-width:0 !important;
-    max-width:none !important;
-    min-height:0 !important;
-    margin:0 !important;
-    padding:3px 8px 4px !important;
-    overflow:hidden !important;
-  }
-
-  body.liveDealerMode #sim .panel{
-    position:absolute !important;
-    left:6px !important;
-    right:6px !important;
-    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
-    width:auto !important;
-    min-width:0 !important;
-    max-width:none !important;
-    height:80px !important;
-    min-height:80px !important;
-    max-height:80px !important;
-    margin:0 !important;
-    padding:6px 8px !important;
-    overflow:hidden !important;
-    z-index:40 !important;
-    display:grid !important;
-    grid-template-columns:36% minmax(0,64%) !important;
-    grid-template-rows:24px 1fr !important;
-    column-gap:8px !important;
-    align-items:center !important;
-  }
-
-  body.liveDealerMode #sim .panel > *{
-    min-width:0 !important;
-    max-width:100% !important;
-  }
-
-  body.liveDealerMode #sim .status{
-    position:static !important;
-    grid-column:1 !important;
-    grid-row:1 !important;
-    width:100% !important;
-    min-width:0 !important;
-    max-width:100% !important;
-    font-size:.66rem !important;
-    line-height:1.05 !important;
-    white-space:nowrap !important;
-    text-overflow:ellipsis !important;
-    overflow:hidden !important;
-  }
-
-  body.liveDealerMode #sim .substatus{
-    position:static !important;
-    grid-column:1 !important;
-    grid-row:2 !important;
-    width:100% !important;
-    min-width:0 !important;
-    max-width:100% !important;
-    height:42px !important;
-    max-height:42px !important;
-    margin:0 !important;
-    font-size:.50rem !important;
-    line-height:1.15 !important;
-    overflow:hidden !important;
-    display:-webkit-box !important;
-    -webkit-line-clamp:3 !important;
-    -webkit-box-orient:vertical !important;
-  }
-
-  body.liveDealerMode #sim #totalEntry,
-  body.liveDealerMode #sim #settleArea,
-  body.liveDealerMode #sim #collectCards{
-    position:static !important;
-    grid-column:2 !important;
-    grid-row:1 / 3 !important;
-    width:100% !important;
-    min-width:0 !important;
-    max-width:100% !important;
-    margin:0 !important;
-    align-self:center !important;
-    justify-self:stretch !important;
-  }
-
-  body.liveDealerMode #sim #totalEntry{
-    display:flex !important;
-    flex-direction:row !important;
-    flex-wrap:nowrap !important;
-    justify-content:center !important;
-    align-items:center !important;
-    gap:5px !important;
-  }
-
-  body.liveDealerMode #sim #totalEntry.hidden{
-    display:none !important;
-  }
-
-  body.liveDealerMode #sim #settleArea .settlementGrid{
-    display:grid !important;
-    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-    gap:4px !important;
-    width:100% !important;
-    margin:0 !important;
-  }
-
-  body.liveDealerMode #sim #settleArea .settle{
-    width:100% !important;
-    min-width:0 !important;
-    max-width:none !important;
-    padding:.46rem .2rem !important;
-    font-size:.58rem !important;
-    white-space:nowrap !important;
-    overflow:hidden !important;
-    text-overflow:ellipsis !important;
-  }
-
-  body.liveDealerMode #sim #payoutLine{
-    width:100% !important;
-    margin-top:3px !important;
-    text-align:center !important;
-    font-size:.49rem !important;
-    white-space:nowrap !important;
-    overflow:hidden !important;
-    text-overflow:ellipsis !important;
-  }
-
-  body.liveDealerMode #sim #collectCards{
-    height:44px !important;
-  }
-
-  body.liveDealerMode #sim .rackPanel{
-    position:absolute !important;
-    left:6px !important;
-    right:6px !important;
-    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
-    width:auto !important;
-    min-width:0 !important;
-    max-width:none !important;
-    height:118px !important;
-    min-height:118px !important;
-    max-height:118px !important;
-    margin:0 !important;
-    z-index:90 !important;
-    overflow:hidden !important;
-  }
+/* Short iPhone landscape */
+@media (orientation:landscape) and (max-height:430px){
+  .top{height:32px;padding:2px 8px}.back{width:28px;height:28px;font-size:18px}.brand{font-size:13px}.rulepill{font-size:9px;padding:3px 6px}
+  .liveScreen{height:calc(100dvh - 32px)}
+  .liveBar{height:32px;padding:2px 6px}.liveBar button,.liveBar select{height:27px;font-size:10px;padding:3px 7px}.liveBar .shoe{font-size:9px}
+  .tableShell{top:34px;bottom:49px}
+  .dealerZone{height:66px;top:2px}.dealerCards{height:56px}.dealerCards .card{width:36px;height:52px;font-size:8px}.dealerCards .card .big{font-size:16px}
+  .seatRow{height:166px;bottom:5px;gap:5px}
+  .seat{height:166px;grid-template-rows:15px 45px 23px minmax(65px,1fr);padding:3px;border-radius:10px}
+  .seatTitle{font-size:8px}.side .name{font-size:5.5px}.side .amt{font-size:6px}.side .paid{font-size:5px}
+  .chip{width:16px;height:16px;font-size:4.5px}.betText{font-size:7px}
+  .playerCards{height:61px}.playerCards .card{width:41px;height:58px;font-size:8px}.playerCards .card .big{font-size:17px}
+  .hud{height:43px;grid-template-columns:minmax(120px,28%) minmax(0,72%);padding:3px 6px}.hudText{font-size:10px}
+  .hudControls input{height:32px;width:65px}.hudControls button{height:32px;font-size:9px;padding:4px 8px}
+  .payTray{height:68px;grid-template-columns:110px minmax(0,1fr) 170px;padding:4px 6px}.payTrayTitle{font-size:9px}.rackBtn .chip{width:23px;height:23px;font-size:5px}.trayRight button{height:30px;font-size:8px}.selected{font-size:8px}
 }
-
-@media (orientation:landscape) and (max-height:390px){
-  body.liveDealerMode #sim .table{
-    bottom:74px !important;
-  }
-  body.liveDealerMode #sim .panel{
-    height:66px !important;
-    min-height:66px !important;
-    max-height:66px !important;
-    grid-template-columns:33% minmax(0,67%) !important;
-    grid-template-rows:20px 1fr !important;
-    padding:4px 6px !important;
-  }
-  body.liveDealerMode #sim .status{
-    font-size:.58rem !important;
-  }
-  body.liveDealerMode #sim .substatus{
-    height:34px !important;
-    max-height:34px !important;
-    font-size:.43rem !important;
-    -webkit-line-clamp:2 !important;
-  }
-  body.liveDealerMode #sim .players{
-    grid-auto-rows:112px !important;
-  }
-  body.liveDealerMode #sim .seat{
-    height:112px !important;
-    min-height:112px !important;
-  }
-}
-
-
-/* ============================================================
-   VERSION 13 — MOBILE CASINO HUD
-   Full table + thin action HUD + compact payout tray.
-   ============================================================ */
-@media (orientation:landscape) {
-  body.liveDealerMode #sim.screen{
-    display:block !important;
-    position:absolute !important;
-    top:32px !important; left:0 !important; right:0 !important; bottom:0 !important;
-    width:100vw !important; height:calc(100dvh - 32px) !important;
-    margin:0 !important; padding:0 !important; overflow:hidden !important;
-  }
-
-  body.liveDealerMode #sim .toolbar{
-    position:absolute !important;
-    top:0 !important; left:6px !important; right:6px !important;
-    height:28px !important; min-height:28px !important;
-    width:auto !important; margin:0 !important; padding:0 2px !important;
-    display:flex !important; align-items:center !important; gap:5px !important;
-    overflow:hidden !important; z-index:30 !important;
-  }
-
-  /* Nearly the entire phone is the felt. */
-  body.liveDealerMode #sim .table{
-    position:absolute !important;
-    top:30px !important; left:5px !important; right:5px !important;
-    bottom:54px !important;
-    width:auto !important; height:auto !important;
-    min-width:0 !important; min-height:0 !important; max-width:none !important;
-    margin:0 !important; padding:2px 8px 4px !important;
-    overflow:hidden !important;
-    border-radius:20% 20% 5% 5% / 10% 10% 3% 3% !important;
-  }
-
-  /* Dealer gets a clean, visible lane. */
-  body.liveDealerMode #sim .dealer{
-    height:64px !important; min-height:64px !important;
-    position:relative !important; z-index:4 !important;
-  }
-  body.liveDealerMode #sim .dealer .cards{
-    height:49px !important; min-height:49px !important;
-  }
-  body.liveDealerMode #sim .dealer .card{
-    width:35px !important; height:49px !important;
-    font-size:.5rem !important;
-  }
-
-  /* Five readable betting positions. */
-  body.liveDealerMode #sim .players{
-    position:absolute !important;
-    left:8px !important; right:8px !important; bottom:5px !important;
-    width:auto !important; margin:0 !important;
-    display:grid !important;
-    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
-    grid-auto-rows:132px !important;
-    gap:5px !important;
-  }
-  body.liveDealerMode #sim .seat{
-    height:132px !important; min-height:132px !important;
-    padding:3px !important; border-radius:10px !important;
-  }
-  body.liveDealerMode #sim .seatTitle{font-size:.55rem !important}
-  body.liveDealerMode #sim .sideSpot{
-    min-height:28px !important; font-size:.37rem !important;
-  }
-  body.liveDealerMode #sim .sideSpot b{font-size:.40rem !important}
-  body.liveDealerMode #sim .bet{font-size:.48rem !important}
-  body.liveDealerMode #sim .betStacks{height:17px !important;min-height:17px !important}
-  body.liveDealerMode #sim .chip{width:18px !important;height:18px !important;font-size:.32rem !important}
-  body.liveDealerMode #sim .hand .cards{height:45px !important;min-height:45px !important}
-  body.liveDealerMode #sim .hand .card{
-    width:32px !important;height:45px !important;
-    margin-left:-9px !important;font-size:.45rem !important;
-  }
-  body.liveDealerMode #sim .hand .card .big{font-size:.9rem !important}
-
-  /* THIN HUD: one fixed bar, no explanatory box taking table space. */
-  body.liveDealerMode #sim .panel{
-    position:absolute !important;
-    left:5px !important; right:5px !important;
-    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
-    width:auto !important; height:47px !important;
-    min-height:47px !important; max-height:47px !important;
-    margin:0 !important; padding:4px 7px !important;
-    z-index:50 !important; overflow:hidden !important;
-    border-radius:10px !important;
-    display:grid !important;
-    grid-template-columns:minmax(125px,31%) minmax(0,69%) !important;
-    grid-template-rows:1fr !important;
-    gap:6px !important;
-    align-items:center !important;
-    background:rgba(1,25,18,.96) !important;
-  }
-  body.liveDealerMode #sim .status{
-    position:static !important; grid-column:1 !important; grid-row:1 !important;
-    width:100% !important; min-width:0 !important; margin:0 !important;
-    font-size:.62rem !important; line-height:1.08 !important;
-    white-space:normal !important; overflow:hidden !important;
-    display:-webkit-box !important; -webkit-line-clamp:2 !important;
-    -webkit-box-orient:vertical !important;
-  }
-  /* Explanatory prose is intentionally hidden in live phone play. */
-  body.liveDealerMode #sim .substatus{display:none !important}
-
-  body.liveDealerMode #sim #totalEntry,
-  body.liveDealerMode #sim #settleArea,
-  body.liveDealerMode #sim #collectCards{
-    position:static !important;
-    grid-column:2 !important; grid-row:1 !important;
-    width:100% !important; min-width:0 !important; max-width:100% !important;
-    margin:0 !important; align-self:center !important;
-  }
-
-  body.liveDealerMode #sim #totalEntry{
-    display:flex !important; flex-wrap:nowrap !important;
-    justify-content:flex-end !important; align-items:center !important; gap:4px !important;
-  }
-  body.liveDealerMode #sim #totalEntry.hidden{display:none !important}
-  body.liveDealerMode #sim #totalEntry input{
-    width:70px !important; height:36px !important;
-    padding:.35rem !important; font-size:.72rem !important;
-  }
-  body.liveDealerMode #sim #totalEntry button{
-    height:36px !important; padding:.35rem .55rem !important; font-size:.58rem !important;
-  }
-
-  body.liveDealerMode #sim #settleArea .settlementGrid{
-    display:flex !important;
-    flex-direction:row !important; flex-wrap:nowrap !important;
-    justify-content:flex-end !important; gap:4px !important;
-    width:100% !important; margin:0 !important;
-  }
-  body.liveDealerMode #sim #settleArea .settle{
-    flex:1 1 0 !important;
-    min-width:0 !important; height:36px !important;
-    padding:.3rem .25rem !important;
-    font-size:.57rem !important; white-space:nowrap !important;
-  }
-  body.liveDealerMode #sim #payoutLine{display:none !important}
-  body.liveDealerMode #sim #collectCards{
-    height:36px !important; padding:.3rem .7rem !important;
-  }
-  body.liveDealerMode #sim .roundSummary{display:none !important}
-
-  /* COMPACT CHIP TRAY. It appears only when JS opens the rack.
-     It no longer covers the dealer or the player cards. */
-  body.liveDealerMode #sim .rackPanel{
-    position:absolute !important;
-    left:5px !important; right:5px !important;
-    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
-    width:auto !important; height:76px !important;
-    min-height:76px !important; max-height:76px !important;
-    margin:0 !important; padding:4px 7px !important;
-    z-index:90 !important; overflow:hidden !important;
-    border-radius:10px !important;
-    background:rgba(1,25,18,.985) !important;
-    display:grid !important;
-    grid-template-columns:155px minmax(0,1fr) 175px !important;
-    grid-template-rows:1fr !important;
-    gap:6px !important; align-items:center !important;
-  }
-  body.liveDealerMode #sim .rackPanel.hidden{display:none !important}
-  body.liveDealerMode #sim .rackPanel .status{
-    display:block !important; grid-column:1 !important;
-    font-size:.58rem !important; line-height:1.08 !important;
-  }
-  body.liveDealerMode #sim .rackPanel .substatus{display:none !important}
-  body.liveDealerMode #sim .rack{
-    grid-column:2 !important;
-    display:grid !important;
-    grid-template-columns:repeat(8,minmax(0,1fr)) !important;
-    gap:2px !important; margin:0 !important;
-  }
-  body.liveDealerMode #sim .rackChip{
-    padding:1px !important; font-size:.36rem !important;
-  }
-  body.liveDealerMode #sim .rackChip .chip{
-    width:25px !important; height:25px !important; font-size:.38rem !important;
-  }
-  body.liveDealerMode #sim .rackFooter{
-    grid-column:3 !important;
-    display:flex !important; flex-direction:row !important;
-    align-items:center !important; justify-content:flex-end !important;
-    gap:3px !important; margin:0 !important;
-  }
-  body.liveDealerMode #sim .rackFooter strong{
-    font-size:.55rem !important; white-space:nowrap !important;
-  }
-  body.liveDealerMode #sim .rackFooter button{
-    height:34px !important; padding:.3rem .45rem !important; font-size:.52rem !important;
-  }
-}
-
-/* Very short landscape phones: shave a few more pixels without shrinking width. */
-@media (orientation:landscape) and (max-height:390px){
-  body.liveDealerMode #sim .table{bottom:49px !important}
-  body.liveDealerMode #sim .panel{
-    height:43px !important; min-height:43px !important; max-height:43px !important;
-  }
-  body.liveDealerMode #sim .players{
-    grid-auto-rows:112px !important;
-  }
-  body.liveDealerMode #sim .seat{
-    height:112px !important; min-height:112px !important;
-  }
-  body.liveDealerMode #sim .sideSpot{min-height:23px !important}
-  body.liveDealerMode #sim .hand .cards{height:38px !important;min-height:38px !important}
-  body.liveDealerMode #sim .hand .card{width:28px !important;height:39px !important}
-  body.liveDealerMode #sim .rackPanel{
-    height:68px !important; min-height:68px !important; max-height:68px !important;
-    grid-template-columns:130px minmax(0,1fr) 160px !important;
-  }
-}
-
 </style>
 </head>
 <body>
 <div class="app">
-<div id="rotateNotice" class="rotateNotice hidden">
-  <div><strong>Rotate your phone sideways</strong><br><span>The live dealer table is designed for landscape so the table and controls stay visible together.</span></div>
-</div>
-<header class="topbar">
-  <button id="back" class="icon hidden">‹</button>
-  <div class="brand">♠ Dealer Trainer</div>
-  <span class="badge">H17 • 3:2</span>
-</header>
+  <header class="top">
+    <button id="backBtn" class="back hidden" aria-label="Back">‹</button>
+    <div class="brand">♠ Dealer Trainer</div>
+    <div class="rulepill">H17 • 3:2</div>
+  </header>
 
-<main id="menu" class="screen">
-  <section class="hero">
-    <div class="small">FREE-FLOWING BLACKJACK PRACTICE</div>
-    <h1>Be the dealer.</h1>
-    <p>The game deals and plays the customers automatically. Dealer mode now includes randomized poker side bets, settled first, followed by the main blackjack wagers.</p>
-    <div class="modegrid">
-      <button id="simStart" class="mode">
-        <div class="small">MAIN MODE</div><h2>Live Dealer Round</h2>
-        <p>Opening deal → settle Lucky Ladies / Top 3 / 21+3 → blackjack action → dealer hand → settle blackjack wagers.</p>
-        <span class="primary">Start dealing</span>
-      </button>
-      <button id="drillStart" class="mode">
-        <div class="small">SPEED MODE</div><h2>10-Second Totals</h2>
-        <p>Random 2–5 card hands. No displayed totals — read the cards and answer fast.</p>
-        <span class="primary">Start drill</span>
-      </button>
-      <button id="payoutStart" class="mode">
-        <div class="small">PAYOUT MODE</div><h2>3:2 Blackjack Payouts</h2>
-        <p>Common blackjack wagers starting at $5. Calculate the additional 3:2 payout while the original wager stays out.</p>
-        <span class="primary">Start payout trainer</span>
-      </button>
-    </div>
-  </section>
-</main>
-
-<main id="sim" class="screen hidden">
-  <div class="toolbar">
-    <button id="newRound" class="primary">New Round</button>
-    <label class="small">Speed:
-      <select id="speedSelect">
-        <option value="training">Training</option>
-        <option value="normal" selected>Normal</option>
-        <option value="fast">Fast</option>
-      </select>
-    </label>
-    <button id="statsBtn" class="secondary">Stats</button>
-    <span id="shoeStatus" class="small">Shoe</span>
-  </div>
-
-  <section class="table">
-    <div id="discardTray" class="discardTray">Discard 0</div>
-    <div id="cutCard" class="cutCard hidden">CUT CARD</div>
-    <div class="dealer">
-      <div class="label">Dealer</div>
-      <div id="dealerCards" class="cards"></div>
-      <div id="dealerAction" class="actionTag"></div>
-    </div>
-    <div id="players" class="players"></div>
-  </section>
-
-  <section class="panel">
-    <div id="status" class="status">Starting...</div>
-    <div id="substatus" class="substatus"></div>
-
-    <div id="totalEntry" class="entry hidden">
-      <input id="totalInput" inputmode="numeric" placeholder="Total">
-      <button id="totalEnter" class="primary">Enter</button>
-      <button id="totalBust" class="secondary">BUST</button>
-    </div>
-
-    <div id="settleArea" class="hidden">
-      <div class="settlementGrid">
-        <button class="settle" data-settle="take">Take Bet</button>
-        <button class="settle" data-settle="push">Push</button>
-        <button class="settle" data-settle="pay1">Pay 1:1</button>
-        <button class="settle" data-settle="payBJ">Pay 3:2</button>
+  <main id="menu" class="screen menu">
+    <section class="hero">
+      <div class="eyebrow">TABLE GAMES PRACTICE</div>
+      <h1>Train like you're on the game.</h1>
+      <p>Dealer mode runs as a live round: opening deal, poker side bets first, then blackjack action, dealer hand, blackjack settlement, and card collection.</p>
+      <div class="modegrid">
+        <button class="mode" id="liveStart">
+          <div class="eyebrow">LIVE MODE</div>
+          <h2>Blackjack Dealer Round</h2>
+          <p>Five table spots, random side bets, automatic player decisions, doubles, splits, H17 dealer play, chip payouts, and immediate bust cleanup.</p>
+          <span class="primary">Start dealer round</span>
+        </button>
+        <button class="mode" id="totalStart">
+          <div class="eyebrow">SPEED MODE</div>
+          <h2>10-Second Hand Totals</h2>
+          <p>Random 2–5 card combinations. Read the cards and call the total before the clock runs out.</p>
+          <span class="primary">Start totals</span>
+        </button>
+        <button class="mode" id="payoutStart">
+          <div class="eyebrow">PAYOUT MODE</div>
+          <h2>3:2 Blackjack Payouts</h2>
+          <p>Common wagers from $5 to $100. The original wager stays out; you enter only the additional 3:2 winnings.</p>
+          <span class="primary">Start payouts</span>
+        </button>
       </div>
-      <div id="payoutLine" class="payoutLine"></div>
+    </section>
+  </main>
+
+  <main id="live" class="liveScreen hidden">
+    <div class="rotate"><div><strong>Rotate your phone sideways</strong><br><span>Live dealer mode is designed for landscape.</span></div></div>
+
+    <div class="liveBar">
+      <button id="newRound" class="primary">New Round</button>
+      <label style="font-size:10px;color:var(--muted)">Speed
+        <select id="speed">
+          <option value="training">Training</option>
+          <option value="normal" selected>Normal</option>
+          <option value="fast">Fast</option>
+        </select>
+      </label>
+      <button id="statsBtn" class="ghost">Stats</button>
+      <div id="shoeText" class="shoe">Shoe</div>
     </div>
 
-    <button id="collectCards" class="primary hidden" style="margin-top:.7rem">Collect All Cards</button>
-    <div id="summary" class="roundSummary"></div>
-  </section>
-
-  <section id="rackPanel" class="panel rackPanel hidden">
-    <div class="status">Payout Tray</div>
-    <div class="substatus">Original wager stays out.</div>
-    <div id="rack" class="rack"></div>
-    <div class="rackFooter">
-      <span id="rackTotal" class="badge">Selected: $0</span>
-      <button id="clearRack" class="secondary">Clear</button>
-      <button id="payRack" class="primary">Pay Hand</button>
-    </div>
-  </section>
-
-  <div id="statsModal" class="modal hidden">
-    <div class="modalCard">
-      <div class="status">Session Stats</div>
-      <div id="statsBody" class="statsBody"></div>
-      <div class="entry">
-        <button id="closeStats" class="primary">Close</button>
-        <button id="resetStats" class="secondary">Reset Stats</button>
+    <section class="tableShell">
+      <div class="dealerZone">
+        <div class="zoneTitle">DEALER</div>
+        <div id="dealerCards" class="cards dealerCards"></div>
       </div>
-    </div>
-  </div>
-</main>
+      <div id="seatRow" class="seatRow"></div>
+    </section>
 
-<main id="drill" class="screen hidden">
-  <section class="drill">
-    <div class="small">10-SECOND HAND TOTALS</div>
-    <h2 style="margin:.2rem 0">Read the cards. Call the number.</h2>
-    <div style="display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin:.6rem 0">
-      <select id="drillCount">
-        <option value="random">Random 2–5</option><option value="2">2 cards</option><option value="3">3 cards</option><option value="4">4 cards</option><option value="5">5 cards</option>
-      </select>
-      <button id="resetDrill" class="secondary">Reset</button>
-    </div>
-    <div class="stats">
-      <div class="stat"><span class="small">Correct</span><strong id="dc">0</strong></div>
-      <div class="stat"><span class="small">Streak</span><strong id="ds">0</strong></div>
-      <div class="stat"><span class="small">Average</span><strong id="da">—</strong></div>
-    </div>
-    <div id="timer" class="timer">10.0</div>
-    <div id="drillHand" class="drillhand"></div>
-    <div id="drillFeedback" class="substatus"></div>
-    <div class="entry" style="justify-content:center">
-      <input id="drillInput" inputmode="numeric" placeholder="Total">
-      <button id="drillEnter" class="primary">Enter</button>
-      <button id="drillBust" class="secondary">BUST</button>
-    </div>
-  </section>
-</main>
+    <section class="hud">
+      <div id="hudText" class="hudText">Starting round…</div>
+      <div id="hudControls" class="hudControls"></div>
+    </section>
 
-<main id="payoutTrainer" class="screen hidden">
-  <section class="drill payoutTrainerCard">
-    <div class="small">3:2 BLACKJACK PAYOUT TRAINER</div>
-    <h2 style="margin:.2rem 0">Pay the blackjack.</h2>
-    <div class="substatus">The original wager stays out. Enter only the additional winnings you place next to it.</div>
-    <div class="payoutBetStage">
+    <section id="payTray" class="payTray hidden">
+      <div class="payTrayTitle">Payout Tray<span>Original wager stays out.</span></div>
+      <div id="rack" class="rack"></div>
+      <div class="trayRight">
+        <span id="selected" class="selected">$0</span>
+        <button id="rackClear" class="ghost">Clear</button>
+        <button id="rackPay" class="primary">Pay</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="totals" class="screen hidden">
+    <section class="drillCard">
+      <div class="eyebrow">10-SECOND TOTALS</div>
+      <h2>Call the hand.</h2>
+      <div class="drillStats">
+        <div class="stat"><span class="eyebrow">Correct</span><strong id="tc">0</strong></div>
+        <div class="stat"><span class="eyebrow">Streak</span><strong id="ts">0</strong></div>
+        <div class="stat"><span class="eyebrow">Average</span><strong id="ta">—</strong></div>
+      </div>
+      <div id="timer" class="timer">10.0</div>
+      <div id="drillCards" class="drillCards"></div>
+      <div id="totalFeedback" class="feedback"></div>
+      <div class="drillInput">
+        <select id="cardCount">
+          <option value="random">Random 2–5</option><option value="2">2 cards</option><option value="3">3 cards</option><option value="4">4 cards</option><option value="5">5 cards</option>
+        </select>
+        <input id="drillAnswer" inputmode="numeric" placeholder="Total">
+        <button id="drillEnter" class="primary">Enter</button>
+        <button id="drillBust" class="ghost">BUST</button>
+      </div>
+    </section>
+  </main>
+
+  <main id="payouts" class="screen hidden">
+    <section class="drillCard">
+      <div class="eyebrow">3:2 PAYOUT TRAINER</div>
+      <h2>Pay the blackjack.</h2>
+      <p style="color:var(--muted)">The wager stays on the layout. Enter only the additional winnings.</p>
+      <div class="drillStats">
+        <div class="stat"><span class="eyebrow">Correct</span><strong id="pc">0</strong></div>
+        <div class="stat"><span class="eyebrow">Streak</span><strong id="ps">0</strong></div>
+        <div class="stat"><span class="eyebrow">Average</span><strong id="pa">—</strong></div>
+      </div>
       <div class="payoutSpot">
-        <div class="small">PLAYER WAGER</div>
-        <div id="payoutBetChips" class="chips payoutBigChips"></div>
-        <strong id="payoutBetText">$5</strong>
+        <div class="eyebrow">PLAYER WAGER</div>
+        <div id="payoutChips" class="chips" style="margin:8px 0"></div>
+        <strong id="payoutBet">$5</strong>
+      </div>
+      <div id="payoutFeedback" class="feedback"></div>
+      <div class="drillInput">
+        <span style="font-weight:950">Pay $</span>
+        <input id="payoutAnswer" inputmode="decimal" placeholder="0.00">
+        <button id="payoutEnter" class="primary">Enter</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="statsModal" class="statsModal hidden">
+    <div class="statsCard">
+      <h3 style="margin:0">Session Stats</h3>
+      <div id="statgrid" class="statgrid"></div>
+      <div style="display:flex;gap:6px">
+        <button id="statsClose" class="primary">Close</button>
+        <button id="statsReset" class="ghost">Reset</button>
       </div>
     </div>
-    <div class="stats">
-      <div class="stat"><span class="small">Correct</span><strong id="pc">0</strong></div>
-      <div class="stat"><span class="small">Streak</span><strong id="ps">0</strong></div>
-      <div class="stat"><span class="small">Average</span><strong id="pa">—</strong></div>
-    </div>
-    <div class="entry" style="justify-content:center">
-      <span style="font-weight:900">Pay $</span>
-      <input id="payoutTrainerInput" inputmode="decimal" placeholder="0.00">
-      <button id="payoutTrainerEnter" class="primary">Enter</button>
-    </div>
-    <div id="payoutTrainerFeedback" class="substatus" style="min-height:1.2em;margin-top:.45rem"></div>
-    <button id="payoutTrainerNext" class="secondary" style="margin-top:.55rem">New Bet</button>
-  </section>
-</main>
+  </div>
 </div>
 
 <script>
 (()=>{
 "use strict";
 const $=s=>document.querySelector(s);
-const menu=$("#menu"),sim=$("#sim"),drill=$("#drill"),payoutTrainer=$("#payoutTrainer"),back=$("#back");
-const SUITS=[["♠",0],["♥",1],["♦",1],["♣",0]];
+const screens={menu:$("#menu"),live:$("#live"),totals:$("#totals"),payouts:$("#payouts")};
+const backBtn=$("#backBtn");
+
+const SUITS=[["♠",false],["♥",true],["♦",true],["♣",false]];
 const RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const DENOMS=[
-  [1000,"orange","$1K"],[500,"purple","$500"],[100,"black","$100"],[25,"green","$25"],
-  [5,"redc","$5"],[2.5,"pink","$2.5"],[1,"white","$1"],[.25,"quarter","25¢"]
+  {v:.25,c:"c025",l:"25¢"},{v:1,c:"c1",l:"$1"},{v:2.5,c:"c25",l:"$2.5"},{v:5,c:"c5",l:"$5"},
+  {v:25,c:"c25d",l:"$25"},{v:100,c:"c100",l:"$100"},{v:500,c:"c500",l:"$500"},{v:1000,c:"c1000",l:"$1K"}
 ];
-let shoe=[];
-let discardCount=0;
-let cutReached=false;
-let cutPosition=75; // cards remaining when cut card is considered reached
-let g=null;
-let timerHandles=[];
+const speedMult={training:1.35,normal:1,fast:.58};
 let speedMode="normal";
-const speedMap={training:1.35,normal:1,fast:.58};
-const session={
-  rounds:0,totalCorrect:0,totalAttempts:0,settleMistakes:0,payoutMistakes:0,
-  blackjacksPaid:0,bustsCalled:0,softHandsSeen:0
-};
-const sleep=ms=>new Promise(r=>{const id=setTimeout(r,Math.max(70,ms*(speedMap[speedMode]||1)));timerHandles.push(id)});
-function clearTimers(){timerHandles.forEach(clearTimeout);timerHandles=[]}
-function show(which){
-  [menu,sim,drill,payoutTrainer].forEach(x=>x.classList.add("hidden"));
-  $("#rotateNotice").classList.add("hidden");
-  document.body.classList.remove("liveDealerMode");
-  if(which==="menu"){menu.classList.remove("hidden");back.classList.add("hidden")}
-  if(which==="sim"){
-    sim.classList.remove("hidden");back.classList.remove("hidden");
-    document.body.classList.add("liveDealerMode");
-    if(window.matchMedia("(orientation:portrait) and (max-width:900px)").matches)$("#rotateNotice").classList.remove("hidden")
-  }
-  if(which==="drill"){drill.classList.remove("hidden");back.classList.remove("hidden");startDrill()}
-  if(which==="payout"){payoutTrainer.classList.remove("hidden");back.classList.remove("hidden");startPayoutTrainer()}
-}
-back.onclick=()=>{clearTimers();stopDrill();show("menu")}
-window.addEventListener("orientationchange",()=>setTimeout(()=>{
-  if(!sim.classList.contains("hidden")&&window.matchMedia("(orientation:portrait) and (max-width:900px)").matches)$("#rotateNotice").classList.remove("hidden");
-  else $("#rotateNotice").classList.add("hidden")
-},160))
-$("#simStart").onclick=()=>{show("sim");newRound()}
-$("#drillStart").onclick=()=>show("drill")
-$("#payoutStart").onclick=()=>show("payout")
-$("#newRound").onclick=newRound;
-$("#speedSelect").onchange=e=>{speedMode=e.target.value};
-function renderSessionStats(){
-  const acc=session.totalAttempts?Math.round(session.totalCorrect/session.totalAttempts*100):0;
-  $("#statsBody").innerHTML=`
-    <div class="stat"><span class="small">Rounds</span><strong>${session.rounds}</strong></div>
-    <div class="stat"><span class="small">Total Calls</span><strong>${session.totalCorrect}/${session.totalAttempts}</strong></div>
-    <div class="stat"><span class="small">Accuracy</span><strong>${acc}%</strong></div>
-    <div class="stat"><span class="small">Busts Called</span><strong>${session.bustsCalled}</strong></div>
-    <div class="stat"><span class="small">Settlement Errors</span><strong>${session.settleMistakes}</strong></div>
-    <div class="stat"><span class="small">Payout Errors</span><strong>${session.payoutMistakes}</strong></div>
-    <div class="stat"><span class="small">3:2 Pays</span><strong>${session.blackjacksPaid}</strong></div>
-    <div class="stat"><span class="small">Soft Hands Seen</span><strong>${session.softHandsSeen}</strong></div>`;
-}
-$("#statsBtn").onclick=()=>{renderSessionStats();$("#statsModal").classList.remove("hidden")};
-$("#closeStats").onclick=()=>$("#statsModal").classList.add("hidden");
-$("#resetStats").onclick=()=>{
-  Object.keys(session).forEach(k=>session[k]=0);
-  renderSessionStats()
-};
+let shoe=[],discard=0,cutAt=80,cutReached=false;
+let g=null;
+let timers=[];
+let rackSelected=[];
+const session={rounds:0,totalCorrect:0,totalAttempts:0,busts:0,settleErrors:0,payoutErrors:0,bjPays:0};
 
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function newShoe(){
-  let a=[];
-  for(let d=0;d<6;d++)for(const [s,red] of SUITS)for(const rank of RANKS)a.push({rank,s,red});
-  discardCount=0;cutReached=false;
-  // Put the cut card roughly 60–75% into a six-deck shoe.
-  cutPosition=70+Math.floor(Math.random()*26);
-  updateShoeUI();
-  return shuffle(a)
+function show(name){
+  Object.values(screens).forEach(s=>s.classList.add("hidden"));
+  screens[name].classList.remove("hidden");
+  backBtn.classList.toggle("hidden",name==="menu");
+  if(name==="totals")startTotalDrill();
+  if(name==="payouts")startPayoutDrill();
 }
-function updateShoeUI(){
-  const ss=$("#shoeStatus");
-  if(ss)ss.textContent=`Shoe: ${shoe.length} • Discard: ${discardCount}`;
-  const tray=$("#discardTray"); if(tray)tray.textContent=`Discard ${discardCount}`;
-  const cc=$("#cutCard"); if(cc)cc.classList.toggle("hidden",!cutReached);
+backBtn.onclick=()=>{clearAllTimers();show("menu")};
+$("#liveStart").onclick=()=>{show("live");newRound()};
+$("#totalStart").onclick=()=>show("totals");
+$("#payoutStart").onclick=()=>show("payouts");
+
+function delay(ms){return new Promise(r=>{const id=setTimeout(r,Math.max(60,ms*(speedMult[speedMode]||1)));timers.push(id)})}
+function clearAllTimers(){timers.forEach(clearTimeout);timers=[]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function freshShoe(){
+  let a=[];for(let d=0;d<6;d++)for(const [s,red] of SUITS)for(const rank of RANKS)a.push({rank,s,red});
+  discard=0;cutReached=false;cutAt=70+Math.floor(Math.random()*26);
+  shoe=shuffle(a);updateShoe();return shoe
 }
 function draw(){
-  if(!shoe.length)shoe=newShoe();
-  const c=shoe.pop();
-  if(!cutReached && shoe.length<=cutPosition)cutReached=true;
-  updateShoeUI();
-  return c
+  if(!shoe.length)freshShoe();
+  const c=shoe.pop();if(!cutReached&&shoe.length<=cutAt)cutReached=true;updateShoe();return c
 }
-function v(c){return c.rank==="A"?11:["J","Q","K"].includes(c.rank)?10:+c.rank}
-function info(cards){let t=cards.reduce((s,c)=>s+v(c),0),aces=cards.filter(c=>c.rank==="A").length;while(t>21&&aces){t-=10;aces--}return{total:t,soft:aces>0,bust:t>21}}
-function bj(h){return !h.split&&h.cards.length===2&&info(h.cards).total===21}
-function pair(h){return h.cards.length===2&&v(h.cards[0])===v(h.cards[1])}
-function money(x){x=Math.round(x*100)/100;return x.toLocaleString(undefined,{minimumFractionDigits:x%1?2:0,maximumFractionDigits:2})}
-function randomBet(){const a=[5,10,12.5,15,20,25,30,35,40,50,60,75,80,100];return a[Math.floor(Math.random()*a.length)]}
+function updateShoe(){$("#shoeText").textContent=`Shoe ${shoe.length} • Discard ${discard}${cutReached?" • CUT":""}`}
+function cv(c){return c.rank==="A"?11:["J","Q","K"].includes(c.rank)?10:+c.rank}
+function handInfo(cards){
+  let total=cards.reduce((s,c)=>s+cv(c),0),aces=cards.filter(c=>c.rank==="A").length;
+  while(total>21&&aces){total-=10;aces--}
+  return{total,soft:aces>0,bust:total>21}
+}
+function money(n){n=Math.round((n+1e-9)*100)/100;return n.toLocaleString(undefined,{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2})}
 function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function randomBet(){return pick([5,10,12.5,15,20,25,30,35,40,50,60,75,80,100])}
 function randomSideBets(){
-  return {
-    ll:Math.random()<.46?pick([5,10,15,20,25,30,35,40,45,50]):0,
+  return{
     top3:Math.random()<.38?pick([5,10]):0,
+    ll:Math.random()<.46?pick([5,10,15,20,25,30,35,40,45,50]):0,
     p213:Math.random()<.48?pick([5,10,15,20,25,30,40,50,75,100,150,200,250]):0
   }
 }
-function pokerValue(c){if(c.rank==="A")return 14;if(c.rank==="K")return 13;if(c.rank==="Q")return 12;if(c.rank==="J")return 11;return +c.rank}
-function flush3(c){return c.length===3&&c.every(x=>x.s===c[0].s)}
-function trips3(c){return c.length===3&&c.every(x=>x.rank===c[0].rank)}
+function cardHTML(c,back=false,horizontal=false){
+  if(back)return `<div class="card back"></div>`;
+  return `<div class="card ${c.red?"red":""} ${horizontal?"horizontal":""}">
+    <span>${c.rank}${c.s}</span><span class="big">${c.s}</span><span style="align-self:end;transform:rotate(180deg)">${c.rank}${c.s}</span>
+  </div>`
+}
+function chipsHTML(amount){
+  let left=Math.round(amount*4)/4,html="";
+  const desc=[...DENOMS].sort((a,b)=>b.v-a.v);
+  for(const d of desc){
+    const count=Math.floor((left+1e-8)/d.v);
+    for(let i=0;i<Math.min(count,4);i++)html+=`<span class="chip ${d.c}">${d.l}</span>`;
+    left=Math.round((left-count*d.v)*100)/100
+  }
+  return html
+}
+function makeHand(bet,split=false){
+  return{cards:[],bet,baseBet:bet,split,double:false,splitAce:false,horiz:[],done:false,cleared:false,paid:0}
+}
+function naturalBJ(h){return !h.split&&h.cards.length===2&&handInfo(h.cards).total===21}
+function pair(h){return h.cards.length===2&&cv(h.cards[0])===cv(h.cards[1])}
+
+/* ---------- poker side bets ---------- */
+function pv(c){if(c.rank==="A")return 14;if(c.rank==="K")return 13;if(c.rank==="Q")return 12;if(c.rank==="J")return 11;return +c.rank}
+function flush3(c){return c.every(x=>x.s===c[0].s)}
+function trips3(c){return c.every(x=>x.rank===c[0].rank)}
 function straight3(c){
-  if(c.length!==3)return false;
-  const a=[...new Set(c.map(pokerValue))].sort((x,y)=>x-y);
+  const a=[...new Set(c.map(pv))].sort((x,y)=>x-y);
   return a.length===3&&((a[0]+1===a[1]&&a[1]+1===a[2])||a.join(",")==="2,3,14")
 }
-function evalLuckyLadies(cards){
-  if(cards.length<2)return{name:"Lose",odds:0};
-  const c=cards.slice(0,2);
-  if(info(c).total!==20)return{name:"Lose",odds:0};
-  if(c[0].rank==="Q"&&c[1].rank==="Q")return{name:"Queens",odds:20};
-  if(c[0].rank===c[1].rank)return{name:"Pair",odds:9};
-  if(c[0].s===c[1].s)return{name:"Suited 20",odds:6};
-  return{name:"Any 20",odds:3}
-}
-// Top 3 evaluates exactly three cards: player's first two + dealer up card.
 function evalTop3(cards){
-  if(cards.length<3)return{name:"Lose",odds:0};
-  const c=cards.slice(0,3),t=trips3(c),f=flush3(c),s=straight3(c);
-  if(t&&f)return{name:"Suited Three of a Kind",odds:270};
+  const t=trips3(cards),f=flush3(cards),s=straight3(cards);
+  if(t&&f)return{name:"Suited Trips",odds:270};
   if(s&&f)return{name:"Straight Flush",odds:180};
-  if(t)return{name:"Three of a Kind",odds:90};
+  if(t)return{name:"Trips",odds:90};
   return{name:"Lose",odds:0}
 }
-function eval213(cards,up){
-  if(cards.length<2||!up)return{name:"Lose",odds:0};
-  const c=[cards[0],cards[1],up],t=trips3(c),f=flush3(c),s=straight3(c);
+function eval213(cards){
+  const t=trips3(cards),f=flush3(cards),s=straight3(cards);
   if(s&&f)return{name:"Straight Flush",odds:9};
-  if(t)return{name:"Three of a Kind",odds:9};
+  if(t)return{name:"Trips",odds:9};
   if(s)return{name:"Straight",odds:9};
   if(f)return{name:"Flush",odds:9};
   return{name:"Lose",odds:0}
 }
-function sideLabel(k){return k==="ll"?"Lucky Ladies":k==="top3"?"Top 3":"21+3"}
+function evalLL(cards){
+  if(handInfo(cards).total!==20)return{name:"Lose",odds:0};
+  const a=cards[0],b=cards[1],same=a.rank===b.rank,suited=a.s===b.s;
+  if(a.rank==="Q"&&b.rank==="Q")return{name:"Queens",odds:20};
+  if(same)return{name:"Pair",odds:9};
+  if(suited)return{name:"Suited 20",odds:6};
+  return{name:"20",odds:3}
+}
 
-function card(c,back=false,horizontal=false){
-  if(back)return `<div class="card back"></div>`;
-  return `<div class="card ${c.red?"red":""} ${horizontal?"horizontal":""}"><span>${c.rank}${c.s}</span><span class="big">${c.s}</span><span style="align-self:end;transform:rotate(180deg)">${c.rank}${c.s}</span></div>`
+/* ---------- rendering ---------- */
+function sideBox(p,pi,key,label,cls){
+  const amt=p.side[key],paid=p.sidePaid[key]||0;
+  const active=g?.phase==="side"&&g.sideCurrent?.pi===pi&&g.sideCurrent?.key===key;
+  return `<div class="side ${cls} ${active?"current":""}">
+    <span class="name">${label}</span>
+    ${amt?`<span class="amt">$${money(amt)}</span>${paid?`<span class="paid">+${money(paid)}</span>`:""}`:`<span class="amt" style="opacity:.28">—</span>`}
+  </div>`
 }
-function chips(n){let left=Math.round(n*4)/4,h="";for(const [val,cls,label] of DENOMS){const cnt=Math.floor((left+1e-8)/val);for(let i=0;i<Math.min(cnt,4);i++)h+=`<span class="chip ${cls}">${label}</span>`;left=Math.round((left-cnt*val)*100)/100}return h}
-function wagerStacks(p){
-  return p.hands.map((h,hi)=>{
-    if(h.cleared)return "";
-    const base=h.baseBet||h.bet;
-    return `<div class="betGroup">
-      <div class="wagerSide">
-        <div class="chips betStack">${chips(base)}</div>
-        ${h.double?`<div class="chips betStack secondBet">${chips(base)}</div>`:""}
-      </div>
-      ${h.paidAmount>0?`<div class="paidSide"><div class="chips betStack payoutStack">${chips(h.paidAmount)}</div><span class="paidTag">PAID</span></div>`:""}
-    </div>`;
-  }).join("");
+function wagerHTML(h){
+  if(h.cleared)return "";
+  const base=h.baseBet;
+  return `<div style="display:flex;gap:2px;align-items:center">
+    <div class="chips">${chipsHTML(base)}</div>
+    ${h.double?`<div class="chips">${chipsHTML(base)}</div>`:""}
+    ${h.paid?`<div class="chips" style="padding-left:3px;border-left:1px solid rgba(255,255,255,.25)">${chipsHTML(h.paid)}</div>`:""}
+  </div>`
 }
-function hand(){return{
-  cards:[],bet:0,baseBet:0,split:false,splitAce:false,double:false,
-  horizontalIndexes:[],done:false,called:false,action:"",paidAmount:0,originalCards:[]
-}}
-function addToHand(h,c){h.cards.push(c);if(h.originalCards.length<3)h.originalCards.push(c)}
-function status(t,s=""){$("#status").textContent=t;$("#substatus").textContent=s}
-function hideInputs(){$("#totalEntry").classList.add("hidden");$("#settleArea").classList.add("hidden")}
 function render(){
   if(!g)return;
-  $("#dealerCards").innerHTML=g.dealer.cards.map((c,i)=>card(c,i===1&&!g.dealer.revealed,false)).join("");
-  $("#dealerAction").textContent=g.dealer.action||"";
-  const occupied=g.players.map((p,pi)=>{
-    const isCurrent=(g.phase==="players"&&pi===g.pi)||(g.phase==="settle"&&g.settle?.pi===pi)||(g.phase==="sidebets"&&g.sideCurrent?.pi===pi);
-    const side=(key,label,cls)=>{
-      const amt=p.sideBets[key],paid=p.sidePaid?.[key]||0;
-      const active=g.phase==="sidebets"&&g.sideCurrent?.pi===pi&&g.sideCurrent?.type===key;
-      return `<div class="sideSpot ${cls} ${active?"activeSide":""}">
-        <span>${label}</span>
-        ${amt?`<b>$${money(amt)}</b><div class="chips miniChips">${chips(amt)}</div>${paid?`<small>+${money(paid)}</small>`:""}`:"<em>—</em>"}
-      </div>`
-    };
-    return `<div class="seat ${isCurrent?"current":""} ${p.done?"done":""}">
-      <div class="seatTitle">Player ${pi+1}</div>
-      <div class="sideBetRow">${side("ll","LL","llSpot")}${side("top3","TOP 3","topSpot")}${side("p213","21+3","p213Spot")}</div>
-      <div class="bet">$${money(p.hands.reduce((s,h)=>s+h.bet,0))}${p.insurance?` • Ins $${money(p.insurance)}`:""}</div>
-      <div class="betStacks">${wagerStacks(p)}</div>
-      ${p.insurance?`<div class="insuranceStack">${chips(p.insurance)}<span class="insuranceTag">INS</span></div>`:""}
-      <div class="handWrap">${p.hands.map((h,hi)=>h.cleared?"":`<div class="hand ${(isCurrent&&g.hi===hi)?"active":""}">
-        <div class="cards">${h.cards.map((c,ci)=>card(c,false,(h.horizontalIndexes||[]).includes(ci))).join("")}</div>
-        <div class="actionTag">${h.action||""}</div>${bj(h)?`<div class="blackjackMark">BLACKJACK</div>`:""}
-      </div>`).join("")}</div>
-    </div>`
-  }).join("");
-  const empties=Array.from({length:Math.max(0,5-g.players.length)},()=>`<div class="seat emptySeat"><div class="seatTitle">Empty</div><div class="emptyCircle"></div></div>`).join("");
-  $("#players").innerHTML=occupied+empties
-}
-function waitForTotal(target,label){
-  return new Promise(resolve=>{
-    g.await={target,label,resolve};
-    $("#totalEntry").classList.remove("hidden");
-    $("#totalInput").value="";
-    status(`Call ${label}'s total.`,`If it is a bust, press BUST — the wager and cards will be swept immediately.`);
-    $("#totalInput").focus()
-  })
-}
-function checkTotal(asBust){
-  if(!g?.await)return;
-  const cards=g.await.target.cards;
-  const x=info(cards);
-  const val=parseInt($("#totalInput").value,10);
-  const ok=asBust?x.bust:(!x.bust&&val===x.total);
-  g.totalAttempts++;session.totalAttempts++;
-  if(ok){
-    g.totalCorrect++;session.totalCorrect++;
-    if(x.soft&&!x.bust)session.softHandsSeen++;
-    if(asBust&&x.bust)session.bustsCalled++;
-    // Casino-style bust cleanup: once the dealer correctly calls BUST,
-    // remove that busted player's cards and wager immediately.
-    if(asBust && x.bust && g.await.target !== g.dealer){
-      g.await.target.cleared = true;
-      discardCount += g.await.target.cards.length;
-      g.await.target.cards = [];
-      g.await.target.bet = 0;
-      updateShoeUI();
-      g.await.target.action = "";
-      render();
+  $("#dealerCards").innerHTML=g.dealer.cards.map((c,i)=>cardHTML(c,i===1&&!g.dealer.revealed,false)).join("");
+  const seats=[];
+  for(let i=0;i<5;i++){
+    const p=g.players[i];
+    if(!p){
+      seats.push(`<div class="seat empty"><div style="font-size:11px;font-weight:900">Empty</div><div class="emptyCircle"></div></div>`);
+      continue
     }
-  } else g.totalMistakes++;
-  $("#totalEntry").classList.add("hidden");
-  const r=g.await.resolve;g.await=null;r();
+    const active=(g.phase==="players"&&g.pi===i)||(g.phase==="side"&&g.sideCurrent?.pi===i)||(g.phase==="settle"&&g.settleCurrent?.pi===i);
+    seats.push(`<div class="seat ${active?"active":""}">
+      <div class="seatTitle">Player ${i+1}</div>
+      <div class="sideRow">
+        ${sideBox(p,i,"top3","TOP 3","top3")}
+        ${sideBox(p,i,"ll","LUCKY LADIES","ll")}
+        ${sideBox(p,i,"p213","21+3","p213")}
+      </div>
+      <div class="wagerArea"><span class="betText">$${money(p.hands.reduce((s,h)=>s+h.bet,0))}</span>${p.hands.map(wagerHTML).join("")}</div>
+      <div class="handArea">${p.hands.map((h,hi)=>h.cleared?"":`<div class="hand">
+        <div class="cards playerCards">${h.cards.map((c,ci)=>cardHTML(c,false,h.horiz.includes(ci))).join("")}</div>
+        <div class="handTag">${h.tag||""}</div>${naturalBJ(h)?`<div class="bjMark">BLACKJACK</div>`:""}
+      </div>`).join("")}</div>
+    </div>`)
+  }
+  $("#seatRow").innerHTML=seats.join("")
 }
-$("#totalEnter").onclick=()=>checkTotal(false);
-$("#totalBust").onclick=()=>checkTotal(true);
-$("#totalInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkTotal(false)});
+function setHUD(text,controls=[]){
+  $("#hudText").textContent=text;
+  $("#hudControls").innerHTML="";
+  for(const c of controls){
+    if(c.type==="input"){
+      const inp=document.createElement("input");inp.id=c.id;inp.inputMode=c.inputMode||"numeric";inp.placeholder=c.placeholder||"Total";$("#hudControls").appendChild(inp);
+    }else{
+      const b=document.createElement("button");b.className=c.primary?"primary":"action";b.textContent=c.label;b.onclick=c.onClick;$("#hudControls").appendChild(b)
+    }
+  }
+  const first=$("#hudControls input");if(first)setTimeout(()=>first.focus(),50)
+}
+function openRack(kind,expected,after){
+  rackSelected=[];g.rackContext={kind,expected,after};
+  renderRack();$("#payTray").classList.remove("hidden")
+}
+function closeRack(){$("#payTray").classList.add("hidden");g.rackContext=null}
+function renderRack(){
+  $("#rack").innerHTML=DENOMS.map(d=>`<button class="rackBtn" data-v="${d.v}"><span class="chip ${d.c}">${d.l}</span><div>${d.l}</div></button>`).join("");
+  $("#selected").textContent=`$${money(rackSelected.reduce((a,b)=>a+b,0))}`;
+  document.querySelectorAll(".rackBtn").forEach(b=>b.onclick=()=>{rackSelected.push(+b.dataset.v);renderRack()})
+}
+$("#rackClear").onclick=()=>{rackSelected=[];renderRack()};
+$("#rackPay").onclick=()=>{
+  const ctx=g?.rackContext;if(!ctx)return;
+  const total=rackSelected.reduce((a,b)=>a+b,0);
+  if(Math.abs(total-ctx.expected)>.001){session.payoutErrors++;setHUD("Payout is not correct yet.");rackSelected=[];renderRack();return}
+  closeRack();ctx.after()
+};
+
+/* ---------- game flow ---------- */
+$("#newRound").onclick=newRound;
+$("#speed").onchange=e=>speedMode=e.target.value;
 
 async function newRound(){
-  clearTimers();hideInputs();$("#collectCards").classList.add("hidden");$("#summary").textContent="";
-  if(!shoe.length)shoe=newShoe();
-  const n=2+Math.floor(Math.random()*4); // 2–5 players on five visible spots
-  g={round:(g?.round||0)+1,phase:"deal",players:[],dealer:{cards:[],revealed:false,action:""},pi:0,hi:0,totalCorrect:0,totalAttempts:0,totalMistakes:0,settleErrors:0};
+  clearAllTimers();$("#payTray").classList.add("hidden");
+  if(!shoe.length)freshShoe();
   session.rounds++;
+  const n=2+Math.floor(Math.random()*4);
+  g={phase:"deal",players:[],dealer:{cards:[],revealed:false},pi:0,hi:0,sideQueue:[],sideIndex:0,settleQueue:[],settleIndex:0,rackContext:null};
   for(let i=0;i<n;i++){
-    const b=randomBet(),h=hand();
-    h.bet=b; h.baseBet=b;
-    g.players.push({
-      hands:[h],insurance:0,done:false,
-      sideBets:randomSideBets(),sidePaid:{ll:0,top3:0,p213:0}
-    })
+    const bet=randomBet();
+    g.players.push({hands:[makeHand(bet)],side:randomSideBets(),sidePaid:{top3:0,ll:0,p213:0},insurance:0,evenMoney:false})
   }
-  render();
-  status("Dealing...","Watch the table like a live game.");
-  await autoInitialDeal();
-
-  // Poker side bets are resolved IMMEDIATELY from the opening layout:
-  // player's first two cards + dealer up card. No hits/doubles/splits happen first.
-  await settlePokerBets();
-
-  // Only after all poker wagers are cleared do we continue the blackjack round.
-  await insuranceAndPeek();
-  if(g.phase!=="settle")await playPlayers();
-  if(g.phase!=="settle")await playDealer();
-  await beginSettlement();
-}
-async function autoInitialDeal(){
+  render();setHUD("Opening deal…");
   for(let pass=0;pass<2;pass++){
-    for(let i=0;i<g.players.length;i++){
-      addToHand(g.players[i].hands[0],draw());render();await sleep(260)
-    }
-    g.dealer.cards.push(draw());render();await sleep(300)
+    for(const p of g.players){p.hands[0].cards.push(draw());render();await delay(220)}
+    g.dealer.cards.push(draw());render();await delay(260)
   }
+  await sideBetPhase();
+  await insurancePeek();
+  if(g.phase!=="settle")await playerPhase();
+  if(g.phase!=="settle")await dealerPhase();
+  await mainSettlement();
 }
-async function insuranceAndPeek(){
+
+function buildSideQueue(){
+  const q=[];
+  g.players.forEach((p,pi)=>{
+    const c=[p.hands[0].cards[0],p.hands[0].cards[1],g.dealer.cards[0]];
+    if(p.side.top3)q.push({pi,key:"top3",bet:p.side.top3,result:evalTop3(c)});
+    if(p.side.ll)q.push({pi,key:"ll",bet:p.side.ll,result:evalLL(p.hands[0].cards.slice(0,2))});
+    if(p.side.p213)q.push({pi,key:"p213",bet:p.side.p213,result:eval213(c)})
+  });
+  return q
+}
+function sideBetPhase(){
+  g.phase="side";g.sideQueue=buildSideQueue();g.sideIndex=0;
+  return new Promise(resolve=>{g.resolveSideAll=resolve;nextSide()})
+}
+function nextSide(){
+  render();
+  if(g.sideIndex>=g.sideQueue.length){
+    g.sideCurrent=null;render();setHUD("Poker bets cleared.");
+    const r=g.resolveSideAll;g.resolveSideAll=null;setTimeout(()=>r(),180);return
+  }
+  const q=g.sideQueue[g.sideIndex];g.sideCurrent=q;render();
+  const label=q.key==="top3"?"Top 3":q.key==="ll"?"Lucky Ladies":"21+3";
+  setHUD(`P${q.pi+1} • ${label} • $${money(q.bet)}`,[
+    {label:"TAKE",onClick:()=>sideDecision("take")},
+    {label:"PAY",primary:true,onClick:()=>sideDecision("pay")}
+  ])
+}
+function sideDecision(a){
+  const q=g.sideCurrent,win=q.result.odds>0;
+  if((win&&a!=="pay")||(!win&&a!=="take")){session.settleErrors++;setHUD("Wrong side-bet action.");setTimeout(nextSide,500);return}
+  if(!win){
+    g.players[q.pi].side[q.key]=0;g.sideIndex++;render();nextSide();return
+  }
+  const expected=q.bet*q.result.odds;
+  openRack("side",expected,()=>{
+    g.players[q.pi].sidePaid[q.key]=expected;g.sideIndex++;render();nextSide()
+  })
+}
+
+async function insurancePeek(){
   const up=g.dealer.cards[0];
-  g.dealerHasBJ=false;
-  g.evenMoneyPlayers=[];
-
   if(up.rank==="A"){
-    status("Insurance is offered.","Players decide automatically. Natural blackjacks may take even money.");
-    await sleep(650);
-
-    g.players.forEach((p,pi)=>{
-      const h=p.hands[0];
-      if(bj(h)){
-        // Simulate player choice on even money; most training value comes from seeing both cases.
-        if(Math.random()<.55){
-          p.evenMoney=true;
-          g.evenMoneyPlayers.push(pi);
-          h.action="EVEN MONEY";
-        }
-      }else if(Math.random()<.30){
-        p.insurance=Math.round((h.bet/2)*4)/4;
-      }
+    setHUD("Insurance offered.");await delay(450);
+    g.players.forEach(p=>{
+      if(naturalBJ(p.hands[0])&&Math.random()<.5)p.evenMoney=true;
+      else if(Math.random()<.3)p.insurance=Math.round((p.hands[0].bet/2)*4)/4
     });
-    render();await sleep(650)
+    render();await delay(350)
   }
-
-  if(up.rank==="A"||v(up)===10){
-    status("Dealer checks for blackjack.","");
-    await sleep(550);
-    g.dealerHasBJ=info(g.dealer.cards).total===21;
-    if(g.dealerHasBJ){
-      g.dealer.revealed=true;g.dealer.action="BLACKJACK";render();await sleep(600);
-      // Insurance resolution happens now. Winning insurance pays 2:1; losing insurance is already gone if no BJ.
-      const insWins=[];
-      g.players.forEach((p,pi)=>{
-        if(p.insurance>0){
-          if(g.dealerHasBJ){
-            p.insuranceWin=true;
-            insWins.push(`P${pi+1} insurance wins`);
-          } else p.insurance=0;
-        }
-      });
-      if(insWins.length) status("Dealer blackjack.",insWins.join(" • ")+" — insurance pays 2:1.");
-      g.phase="settle";
-    }else{
-      // If no dealer blackjack, insurance bets are immediately collected.
-      g.players.forEach(p=>{if(p.insurance>0)p.insurance=0});
-      render();
-    }
+  if(up.rank==="A"||cv(up)===10){
+    setHUD("Dealer checks blackjack…");await delay(450);
+    const dbj=handInfo(g.dealer.cards).total===21;
+    if(dbj){g.dealer.revealed=true;g.phase="settle";render();return}
   }
 }
-function choosePlayerAction(h,p){
-  const x=info(h.cards);
-  const up=v(g.dealer.cards[0]);
-  const canDouble=h.cards.length===2;
-  const canSplit=h.cards.length===2 && pair(h) && p.hands.length<4 &&
-    !(h.cards[0].rank==="A" && h.split); // no re-splitting aces
 
-  // Pair strategy (multi-deck, H17, DAS).
+function basicAction(h,p){
+  const x=handInfo(h.cards),up=cv(g.dealer.cards[0]),canDouble=h.cards.length===2,canSplit=h.cards.length===2&&pair(h)&&p.hands.length<4&&!(h.cards[0].rank==="A"&&h.split);
   if(canSplit){
-    const pv=v(h.cards[0]);
-    if(pv===11 || pv===8)return "split";
-    if((pv===2 || pv===3) && up>=2 && up<=7)return "split";
-    if(pv===4 && (up===5 || up===6))return "split";
-    if(pv===6 && up>=2 && up<=6)return "split";
-    if(pv===7 && up>=2 && up<=7)return "split";
-    if(pv===9 && ((up>=2&&up<=6)||up===8||up===9))return "split";
-    if(pv===10)return "stand";
-    // Pair of 5s falls through as hard 10.
+    const v=cv(h.cards[0]);
+    if(v===11||v===8)return"split";
+    if((v===2||v===3)&&up>=2&&up<=7)return"split";
+    if(v===4&&(up===5||up===6))return"split";
+    if(v===6&&up>=2&&up<=6)return"split";
+    if(v===7&&up>=2&&up<=7)return"split";
+    if(v===9&&((up>=2&&up<=6)||up===8||up===9))return"split";
+    if(v===10)return"stand"
   }
-
-  // Soft totals.
   if(x.soft){
-    if(x.total<=12)return "hit";
-    if(x.total===13 || x.total===14)return canDouble&&(up===5||up===6)?"double":"hit";
-    if(x.total===15 || x.total===16)return canDouble&&(up>=4&&up<=6)?"double":"hit";
-    if(x.total===17)return canDouble&&(up>=3&&up<=6)?"double":"hit";
-    if(x.total===18){
-      if(canDouble&&up>=2&&up<=6)return "double";
-      if(up===7||up===8)return "stand";
-      return "hit";
-    }
-    if(x.total===19){
-      if(canDouble&&up===6)return "double";
-      return "stand";
-    }
-    return "stand";
+    if(x.total<=12)return"hit";
+    if([13,14].includes(x.total))return canDouble&&[5,6].includes(up)?"double":"hit";
+    if([15,16].includes(x.total))return canDouble&&up>=4&&up<=6?"double":"hit";
+    if(x.total===17)return canDouble&&up>=3&&up<=6?"double":"hit";
+    if(x.total===18){if(canDouble&&up>=2&&up<=6)return"double";if([7,8].includes(up))return"stand";return"hit"}
+    if(x.total===19)return canDouble&&up===6?"double":"stand";
+    return"stand"
   }
-
-  // Hard totals.
-  if(x.total<=8)return "hit";
+  if(x.total<=8)return"hit";
   if(x.total===9)return canDouble&&up>=3&&up<=6?"double":"hit";
   if(x.total===10)return canDouble&&up>=2&&up<=9?"double":"hit";
-  if(x.total===11)return canDouble?"double":"hit"; // H17: double 11 vs Ace too
+  if(x.total===11)return canDouble?"double":"hit";
   if(x.total===12)return up>=4&&up<=6?"stand":"hit";
   if(x.total>=13&&x.total<=16)return up>=2&&up<=6?"stand":"hit";
-  return "stand";
+  return"stand"
 }
-async function playPlayers(){
+async function playerPhase(){
   g.phase="players";
   for(g.pi=0;g.pi<g.players.length;g.pi++){
     const p=g.players[g.pi];
     for(g.hi=0;g.hi<p.hands.length;g.hi++){
       let h=p.hands[g.hi];
-      if(h.splitAce && h.done){
-        render();
-        await waitForTotal(h,`Player ${g.pi+1}${p.hands.length>1?` hand ${g.hi+1}`:""}`);
-        continue
-      }
-      if(bj(h)){h.action="BLACKJACK";render();await waitForTotal(h,`Player ${g.pi+1}`);continue}
+      if(naturalBJ(h)){h.tag="BLACKJACK";render();await askTotal(h,`P${g.pi+1} total`);continue}
+      if(h.splitAce&&h.done){await askTotal(h,`P${g.pi+1} split ace`);continue}
       let running=true;
       while(running){
-        const act=choosePlayerAction(h,p);
-        h.action=act.toUpperCase();render();
-        status(`Player ${g.pi+1}${p.hands.length>1?` hand ${g.hi+1}`:""}: ${act.toUpperCase()}`,"You handle the table; the game handles the customer's decision.");
-        await sleep(600);
-        if(act==="hit"){
-          addToHand(h,draw());render();await sleep(450);
-          if(info(h.cards).bust||info(h.cards).total===21)running=false;
-        }else if(act==="double"){
-          h.bet*=2;
-          h.double=true;
-          addToHand(h,draw());
-          h.horizontalIndexes.push(h.cards.length-1); // double card is laid sideways
-          render();await sleep(500);running=false;
-        }else if(act==="split"){
-          const splittingAces=(h.cards[0].rank==="A" && h.cards[1].rank==="A");
-          const c2=h.cards.pop();
+        const a=basicAction(h,p);h.tag=a.toUpperCase();render();setHUD(`P${g.pi+1} • ${a.toUpperCase()}`);await delay(420);
+        if(a==="hit"){
+          h.cards.push(draw());render();await delay(350);
+          const x=handInfo(h.cards);if(x.bust||x.total===21)running=false
+        }else if(a==="stand")running=false;
+        else if(a==="double"){
+          h.double=true;h.bet*=2;h.cards.push(draw());h.horiz.push(h.cards.length-1);render();await delay(380);running=false
+        }else if(a==="split"){
+          const splitAces=h.cards[0].rank==="A"&&h.cards[1].rank==="A";
+          const second=h.cards.pop(),base=h.baseBet;
           h.split=true;
-          if(!h.baseBet)h.baseBet=h.bet;
-          const h2=hand();
-          h2.bet=h.baseBet||h.bet; h2.baseBet=h.baseBet||h.bet; h2.split=true; h2.cards=[c2];h2.originalCards=[c2];
+          const h2=makeHand(base,true);h2.cards=[second];
           p.hands.splice(g.hi+1,0,h2);
-
-          // Each split hand receives its next card.
-          addToHand(h,draw());
-          h2.cards.push(draw());
-
-          if(splittingAces){
-            // Split aces: one card to each ace, no more action, and that added card is sideways.
-            h.splitAce=true; h2.splitAce=true;
-            h.horizontalIndexes=[1]; h2.horizontalIndexes=[1];
-            h.done=true; h2.done=true;
-            h.action="SPLIT ACE"; h2.action="SPLIT ACE";
-            render();await sleep(650);running=false;
-          }else{
-            h.action="SPLIT";
-            h2.action="SPLIT";
-            render();await sleep(550);
-            // Continue basic-strategy action on the first split hand.
-          }
-        }else running=false;
+          h.cards.push(draw());h2.cards.push(draw());
+          if(splitAces){
+            h.splitAce=h2.splitAce=true;h.done=h2.done=true;h.horiz=[1];h2.horiz=[1];h.tag=h2.tag="SPLIT ACE";render();await delay(420);running=false
+          }else{h.tag="SPLIT";h2.tag="SPLIT";render();await delay(380)}
+        }
       }
       h.done=true;render();
-      await waitForTotal(h,`Player ${g.pi+1}${p.hands.length>1?` hand ${g.hi+1}`:""}`);
+      await askTotal(h,`P${g.pi+1}${p.hands.length>1?` H${g.hi+1}`:""} total`)
     }
-    p.done=true;render();await sleep(250)
   }
 }
-async function playDealer(){
-  g.phase="dealer";
-  g.dealer.revealed=true;g.dealer.action="REVEAL";render();
-  status("Dealer hand.","Keep the dealer total in your head.");
-  await sleep(650);
+function askTotal(h,label){
+  return new Promise(resolve=>{
+    const x=handInfo(h.cards);
+    setHUD(label,[
+      {type:"input",id:"callInput",placeholder:"Total"},
+      {label:"ENTER",primary:true,onClick:()=>{
+        session.totalAttempts++;
+        const val=parseInt($("#callInput").value,10);
+        if(!x.bust&&val===x.total){session.totalCorrect++;setHUD("Correct.");setTimeout(resolve,180)}
+        else{setHUD("Try again.");setTimeout(()=>askAgain(),300)}
+      }},
+      {label:"BUST",onClick:()=>{
+        session.totalAttempts++;
+        if(x.bust){
+          session.totalCorrect++;session.busts++;
+          discard+=h.cards.length;h.cards=[];h.bet=0;h.cleared=true;render();setHUD("Bust cleared.");setTimeout(resolve,180)
+        }else{setHUD("Not a bust.");setTimeout(()=>askAgain(),300)}
+      }}
+    ]);
+    function askAgain(){
+      setHUD(label,[
+        {type:"input",id:"callInput",placeholder:"Total"},
+        {label:"ENTER",primary:true,onClick:()=>{
+          session.totalAttempts++;const val=parseInt($("#callInput").value,10);
+          if(!x.bust&&val===x.total){session.totalCorrect++;setHUD("Correct.");setTimeout(resolve,180)}else askAgain()
+        }},
+        {label:"BUST",onClick:()=>{
+          session.totalAttempts++;
+          if(x.bust){session.totalCorrect++;session.busts++;discard+=h.cards.length;h.cards=[];h.bet=0;h.cleared=true;render();setHUD("Bust cleared.");setTimeout(resolve,180)}else askAgain()
+        }}
+      ])
+    }
+  })
+}
+
+async function dealerPhase(){
+  g.phase="dealer";g.dealer.revealed=true;render();setHUD("Dealer hand…");await delay(400);
   while(true){
-    const x=info(g.dealer.cards);
+    const x=handInfo(g.dealer.cards);
     if(x.bust)break;
     const hit=x.total<17||(x.total===17&&x.soft);
     if(!hit)break;
-    g.dealer.action="HIT";render();await sleep(450);
-    g.dealer.cards.push(draw());render();await sleep(550)
+    g.dealer.cards.push(draw());render();await delay(420)
   }
-  g.dealer.action="STAND";render();
-  await waitForTotal(g.dealer,"dealer");
-}
-function expectedSettlement(h,pObj){
-  const p=info(h.cards),d=info(g.dealer.cards);
-  const dealerBJ=g.dealer.cards.length===2&&d.total===21;
-  if(p.bust)return"take";
-  if(bj(h)){
-    if(pObj?.evenMoney)return"pay1";
-    if(dealerBJ)return"push";
-    return"payBJ"
-  }
-  if(dealerBJ)return"take";
-  if(d.bust)return"pay1";
-  if(p.total>d.total)return"pay1";
-  if(p.total<d.total)return"take";
-  return"push"
+  await new Promise(resolve=>{
+    const x=handInfo(g.dealer.cards);
+    setHUD("Dealer total",[
+      {type:"input",id:"dealerInput",placeholder:"Total"},
+      {label:"ENTER",primary:true,onClick:()=>{
+        session.totalAttempts++;const v=parseInt($("#dealerInput").value,10);
+        if(!x.bust&&v===x.total){session.totalCorrect++;resolve()}else setHUD("Dealer total — try again.")
+      }},
+      {label:"BUST",onClick:()=>{
+        session.totalAttempts++;
+        if(x.bust){session.totalCorrect++;session.busts++;resolve()}else setHUD("Dealer is not busted.")
+      }}
+    ])
+  })
 }
 
-function sideCardsFor(p){
-  const h=p.hands[0];
-  return h.originalCards.length?h.originalCards:h.cards
+function outcome(p,h){
+  const ph=handInfo(h.cards),dh=handInfo(g.dealer.cards),dbj=g.dealer.cards.length===2&&dh.total===21;
+  if(h.cleared||ph.bust)return"skip";
+  if(naturalBJ(h)){if(p.evenMoney)return"pay1";if(dbj)return"push";return"payBJ"}
+  if(dbj)return"take";
+  if(dh.bust)return"pay1";
+  if(ph.total>dh.total)return"pay1";if(ph.total<dh.total)return"take";return"push"
 }
-function buildSideQueue(){
-  const q=[];
-  g.players.forEach((p,pi)=>{
-    const c=sideCardsFor(p);
-    if(p.sideBets.ll)q.push({pi,type:"ll",bet:p.sideBets.ll,result:evalLuckyLadies(c)});
-    if(p.sideBets.top3)q.push({pi,type:"top3",bet:p.sideBets.top3,result:evalTop3([c[0],c[1],g.dealer.cards[0]])});
-    if(p.sideBets.p213)q.push({pi,type:"p213",bet:p.sideBets.p213,result:eval213(c,g.dealer.cards[0])})
-  });
-  return q
+function mainSettlement(){
+  g.phase="settle";g.settleQueue=[];
+  g.players.forEach((p,pi)=>p.hands.forEach((h,hi)=>{const o=outcome(p,h);if(o!=="skip")g.settleQueue.push({pi,hi,o,h,p})}));
+  g.settleIndex=0;return new Promise(resolve=>{g.resolveSettlement=resolve;nextSettle()})
 }
-function restoreSettleButtons(){
-  const n={take:"Take Bet",push:"Push",pay1:"Pay 1:1",payBJ:"Pay 3:2"};
-  document.querySelectorAll("[data-settle]").forEach(b=>{b.style.display="";b.textContent=n[b.dataset.settle]})
-}
-async function settlePokerBets(){
-  g.phase="sidebets";g.sideQueue=buildSideQueue();g.sideIndex=0;
-  if(!g.sideQueue.length){status("No side bets.","Blackjack action.");await sleep(220);return}
-  return new Promise(resolve=>{g.sideResolveAll=resolve;showSideBet()})
-}
-function showSideBet(){
-  hideInputs();
-  if(g.sideIndex>=g.sideQueue.length){
-    g.sideCurrent=null;render();restoreSettleButtons();
-    const r=g.sideResolveAll;g.sideResolveAll=null;
-    status("Poker bets cleared.","Blackjack action.");
-    setTimeout(()=>r&&r(),Math.max(80,220*(speedMap[speedMode]||1)));return
+function nextSettle(){
+  if(g.settleIndex>=g.settleQueue.length){
+    setHUD("All wagers settled.",[{label:"COLLECT ALL CARDS",primary:true,onClick:collectAll}]);return
   }
-  const q=g.sideQueue[g.sideIndex];g.sideCurrent=q;render();
-  $("#settleArea").classList.remove("hidden");
-  document.querySelectorAll("[data-settle]").forEach(b=>{
-    const a=b.dataset.settle;b.style.display=(a==="take"||a==="pay1")?"":"none";
-    b.textContent=a==="take"?"Take Side Bet":"Pay Side Bet"
-  });
-  status(`P${q.pi+1} — ${sideLabel(q.type)} $${money(q.bet)}`,``);
-  $("#payoutLine").textContent=`${sideLabel(q.type)} wager: $${money(q.bet)}`
+  const q=g.settleQueue[g.settleIndex];g.settleCurrent=q;render();
+  setHUD(`P${q.pi+1}${q.p.hands.length>1?` H${q.hi+1}`:""} • $${money(q.h.bet)}`,[
+    {label:"TAKE",onClick:()=>settleDecision("take")},
+    {label:"PUSH",onClick:()=>settleDecision("push")},
+    {label:"PAY 1:1",onClick:()=>settleDecision("pay1")},
+    {label:"PAY 3:2",primary:true,onClick:()=>settleDecision("payBJ")}
+  ])
+}
+function settleDecision(a){
+  const q=g.settleQueue[g.settleIndex];
+  if(a!==q.o){session.settleErrors++;setHUD("Wrong settlement.");setTimeout(nextSettle,500);return}
+  if(a==="pay1"||a==="payBJ"){
+    const expected=a==="payBJ"?q.h.bet*1.5:q.h.bet;
+    openRack("main",expected,()=>{
+      if(a==="payBJ"){session.bjPays++}q.h.paid=expected;g.settleIndex++;render();nextSettle()
+    });return
+  }
+  g.settleIndex++;nextSettle()
+}
+async function collectAll(){
+  setHUD("Collecting cards…");
+  for(const p of g.players)for(const h of p.hands){discard+=h.cards.length;h.cards=[];h.paid=0;render();await delay(70)}
+  discard+=g.dealer.cards.length;g.dealer.cards=[];render();updateShoe();
+  if(cutReached)freshShoe();
+  setHUD(cutReached?"Fresh shoe ready.":"Table clear.",[{label:"NEW ROUND",primary:true,onClick:newRound}])
 }
 
-async function beginSettlement(){
-  restoreSettleButtons();
-  g.phase="settle";
-  g.queue=[];
-  g.players.forEach((p,pi)=>p.hands.forEach((h,hi)=>{
-    if(!h.cleared) g.queue.push({pi,hi,h,expected:expectedSettlement(h,p)});
-  }));
-  g.qi=0;
-  showSettlement();
-}
-function showSettlement(){
-  hideInputs();
-  if(g.qi>=g.queue.length){
-    $("#settleArea").classList.add("hidden");
-    $("#collectCards").classList.remove("hidden");
-    status("All bets settled.","Sweep the layout when you're ready.");
-    $("#summary").textContent=`Totals called: ${g.totalCorrect}/${g.totalAttempts}. Settlement mistakes: ${g.settleErrors}.`;
-    return
-  }
-  const q=g.queue[g.qi];g.settle=q;g.pi=q.pi;g.hi=q.hi;render();
-  $("#settleArea").classList.remove("hidden");
-  status(`Settle Player ${q.pi+1}${g.players[q.pi].hands.length>1?` hand ${q.hi+1}`:""}.`,"Choose what you would physically do with the wager.");
-  $("#payoutLine").textContent=`Original wager stays: $${money(q.h.bet)}${g.players[q.pi].evenMoney&&bj(q.h)?" • EVEN MONEY":""}`
-}
-let rackSelected=[];
-function rackValue(){return rackSelected.reduce((s,x)=>s+x,0)}
-function renderRack(){
-  $("#rack").innerHTML=DENOMS.slice().reverse().map(([val,cls,label])=>`
-    <button class="rackChip" data-chip="${val}">
-      <span class="chip ${cls}">${label}</span><span>${label}</span>
-    </button>`).join("");
-  $("#rackTotal").textContent=`Selected: $${money(rackValue())}`;
-  document.querySelectorAll("[data-chip]").forEach(b=>b.onclick=()=>{
-    rackSelected.push(parseFloat(b.dataset.chip));renderRack()
-  });
-}
-function openRack(){
-  rackSelected=[];
-  $("#rackPanel").classList.remove("hidden");
-  renderRack();
-}
-function closeRack(){$("#rackPanel").classList.add("hidden")}
-$("#clearRack").onclick=()=>{rackSelected=[];renderRack()};
-$("#rackTotal").onclick=()=>{
-  if(rackSelected.length){rackSelected.pop();renderRack()}
+/* ---------- stats ---------- */
+$("#statsBtn").onclick=()=>{
+  const acc=session.totalAttempts?Math.round(session.totalCorrect/session.totalAttempts*100):0;
+  $("#statgrid").innerHTML=`
+    <div class="stat">Rounds<strong>${session.rounds}</strong></div>
+    <div class="stat">Total Calls<strong>${session.totalCorrect}/${session.totalAttempts}</strong></div>
+    <div class="stat">Accuracy<strong>${acc}%</strong></div>
+    <div class="stat">Busts<strong>${session.busts}</strong></div>
+    <div class="stat">Settlement Errors<strong>${session.settleErrors}</strong></div>
+    <div class="stat">Payout Errors<strong>${session.payoutErrors}</strong></div>
+    <div class="stat">3:2 Pays<strong>${session.bjPays}</strong></div>`;
+  $("#statsModal").classList.remove("hidden")
 };
-$("#payRack").onclick=()=>{
-  if(g?.pendingSideRack&&g.sideCurrent){
-    const q=g.sideCurrent,expected=g.sidePayout;
-    if(Math.abs(rackValue()-expected)>.001){
-      g.settleErrors++;session.payoutMistakes++;status("Side-bet payout is not correct yet.",`${q.result.odds}:1 on $${money(q.bet)}.`);rackSelected=[];renderRack();return
-    }
-    g.players[q.pi].sidePaid[q.type]=expected;g.pendingSideRack=false;closeRack();g.sideIndex++;render();showSideBet();return
-  }
-  if(!g?.settle)return;
-  const q=g.settle,expected=q.expected==="payBJ"?q.h.bet*1.5:q.h.bet;
-  if(Math.abs(rackValue()-expected)>.001){
-    g.settleErrors++;session.payoutMistakes++;status(`Payout is not correct yet.`,`Rebuild the winnings payout from the rack.`);rackSelected=[];renderRack();return
-  }
-  if(q.expected==="payBJ")session.blackjacksPaid++;
-  q.h.paidAmount=expected;render();closeRack();g.qi++;showSettlement()
-};
+$("#statsClose").onclick=()=>$("#statsModal").classList.add("hidden");
+$("#statsReset").onclick=()=>{Object.keys(session).forEach(k=>session[k]=0);$("#statsModal").classList.add("hidden")};
 
-document.querySelectorAll("[data-settle]").forEach(btn=>btn.onclick=()=>{
-  const chosen=btn.dataset.settle;
-  if(g?.phase==="sidebets"&&g.sideCurrent){
-    const q=g.sideCurrent,win=q.result.odds>0;
-    if((win&&chosen!=="pay1")||(!win&&chosen!=="take")){
-      g.settleErrors++;session.settleMistakes++;status("Wrong side-bet action.",`Re-read ${sideLabel(q.type)} and try again.`);return
-    }
-    if(win){
-      g.pendingSideRack=true;g.sidePayout=q.bet*q.result.odds;
-      status(`${q.result.name}. Build the payout.`,`${q.result.odds}:1. The original side wager stays out.`);
-      openRack();return
-    }
-    g.players[q.pi].sideBets[q.type]=0;g.sideIndex++;render();showSideBet();return
-  }
-  if(!g?.settle)return;
-  const q=g.settle;
-  if(chosen!==q.expected){g.settleErrors++;session.settleMistakes++;g.qi++;showSettlement();return}
-  if(chosen==="pay1"||chosen==="payBJ"){
-    status(`Build Player ${q.pi+1}'s payout.`,`The original wager stays in place — add only the dealer's payout next to it.`);openRack()
-  }else{g.qi++;showSettlement()}
-});
-$("#collectCards").onclick=async()=>{
-  $("#collectCards").classList.add("hidden");
-  status("Collecting cards...","");
-  const cardsUsed=g.players.reduce((s,p)=>s+p.hands.reduce((a,h)=>a+h.cards.length,0),0)+g.dealer.cards.length;
-  // visual sweep by removing hands left to right
-  for(const p of g.players){
-    p.sideBets={ll:0,top3:0,p213:0};p.sidePaid={ll:0,top3:0,p213:0};
-    for(const h of p.hands){h.cards=[];h.action="";h.paidAmount=0;render();await sleep(90)}
-  }
-  g.dealer.cards=[];g.dealer.action="";render();await sleep(250);
-  discardCount += cardsUsed;
-  updateShoeUI();
-  if(cutReached){
-    status("Cut card reached.","Finish is complete — next round starts with a fresh shuffled shoe.");
-    shoe=newShoe();
-  }else{
-    status("Table clear.","Press New Round for the next hand.");
-  }
-  $("#summary").textContent+=`  Round complete.`
-};
+/* ---------- 10 second totals ---------- */
+let td={correct:0,tries:0,streak:0,times:[],cards:[],answer:null,start:0,int:null,locked:false};
+function stopTD(){if(td.int)clearInterval(td.int);td.int=null}
+function startTotalDrill(){
+  if(screens.totals.classList.contains("hidden"))return;
+  stopTD();const v=$("#cardCount").value,n=v==="random"?2+Math.floor(Math.random()*4):+v;
+  td.cards=Array.from({length:n},draw);td.answer=handInfo(td.cards);td.start=performance.now();td.locked=false;
+  $("#drillCards").innerHTML=td.cards.map(c=>cardHTML(c)).join("");$("#drillAnswer").value="";$("#totalFeedback").textContent="";
+  tickTD();td.int=setInterval(tickTD,100);setTimeout(()=>$("#drillAnswer").focus(),40)
+}
+function tickTD(){
+  if(td.locked)return;const r=Math.max(0,10-(performance.now()-td.start)/1000),el=$("#timer");el.textContent=r.toFixed(1);el.classList.toggle("low",r<=3);
+  if(r<=0){td.locked=true;stopTD();td.tries++;td.streak=0;$("#totalFeedback").textContent=`Time — ${td.answer.bust?"BUST":td.answer.total}`;renderTD();setTimeout(startTotalDrill,1000)}
+}
+function answerTD(bust){
+  if(td.locked)return;const v=parseInt($("#drillAnswer").value,10),ok=bust?td.answer.bust:(!td.answer.bust&&v===td.answer.total),t=(performance.now()-td.start)/1000;td.tries++;
+  if(ok){td.correct++;td.streak++;td.times.push(t);td.locked=true;stopTD();$("#totalFeedback").textContent=`Correct — ${t.toFixed(1)}s`;renderTD();setTimeout(startTotalDrill,600)}
+  else{td.streak=0;$("#totalFeedback").textContent="Try again.";renderTD()}
+}
+function renderTD(){$("#tc").textContent=`${td.correct}/${td.tries}`;$("#ts").textContent=td.streak;$("#ta").textContent=td.times.length?(td.times.reduce((a,b)=>a+b,0)/td.times.length).toFixed(1)+"s":"—"}
+$("#drillEnter").onclick=()=>answerTD(false);$("#drillBust").onclick=()=>answerTD(true);$("#drillAnswer").addEventListener("keydown",e=>{if(e.key==="Enter")answerTD(false)});$("#cardCount").onchange=startTotalDrill;
 
-/* speed drill */
-let d={correct:0,tries:0,streak:0,times:[],cards:[],ans:null,start:0,int:null,locked:false};
-function stopDrill(){if(d.int)clearInterval(d.int);d.int=null}
-function startDrill(){
-  if(drill.classList.contains("hidden"))return;
-  stopDrill();const val=$("#drillCount").value,n=val==="random"?2+Math.floor(Math.random()*4):+val;
-  d.cards=Array.from({length:n},draw);d.ans=info(d.cards);d.start=performance.now();d.locked=false;
-  $("#drillHand").innerHTML=d.cards.map(c=>card(c)).join("");$("#drillInput").value="";$("#drillFeedback").textContent="";
-  tick();d.int=setInterval(tick,100);setTimeout(()=>$("#drillInput").focus(),50)
+/* ---------- 3:2 payout drill ---------- */
+let pd={correct:0,tries:0,streak:0,times:[],bet:5,start:0,locked:false};
+const common=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,12.5,17.5,22.5,27.5,37.5,47.5];
+function startPayoutDrill(){
+  if(screens.payouts.classList.contains("hidden"))return;
+  pd.bet=Math.random()<.9?pick(common.slice(0,20)):pick(common.slice(20));pd.start=performance.now();pd.locked=false;
+  $("#payoutBet").textContent=`$${money(pd.bet)}`;$("#payoutChips").innerHTML=chipsHTML(pd.bet);$("#payoutAnswer").value="";$("#payoutFeedback").textContent="";setTimeout(()=>$("#payoutAnswer").focus(),40)
 }
-function tick(){
-  if(d.locked)return;
-  const r=Math.max(0,10-(performance.now()-d.start)/1000),el=$("#timer");el.textContent=r.toFixed(1);el.classList.toggle("low",r<=3);
-  if(r<=0){d.locked=true;stopDrill();d.tries++;d.streak=0;$("#drillFeedback").textContent=`Time — answer was ${d.ans.bust?"BUST":d.ans.total}.`;renderD();setTimeout(startDrill,1100)}
+function answerPD(){
+  if(pd.locked)return;const v=parseFloat($("#payoutAnswer").value),exp=pd.bet*1.5;pd.tries++;
+  if(Math.abs(v-exp)<.001){const t=(performance.now()-pd.start)/1000;pd.correct++;pd.streak++;pd.times.push(t);pd.locked=true;$("#payoutFeedback").textContent=`Correct — add $${money(exp)}`;renderPD();setTimeout(startPayoutDrill,650)}
+  else{pd.streak=0;$("#payoutFeedback").textContent="Try again.";renderPD()}
 }
-function answerD(bust){
-  if(d.locked)return;
-  const n=parseInt($("#drillInput").value,10),ok=bust?d.ans.bust:(!d.ans.bust&&n===d.ans.total),t=(performance.now()-d.start)/1000;
-  d.tries++;
-  if(ok){d.correct++;d.streak++;d.times.push(t);d.locked=true;stopDrill();$("#drillFeedback").textContent=`Correct — ${t.toFixed(1)}s`;renderD();setTimeout(startDrill,600)}
-  else{d.streak=0;$("#drillFeedback").textContent="Wrong — keep going.";renderD()}
-}
-function renderD(){$("#dc").textContent=`${d.correct}/${d.tries}`;$("#ds").textContent=d.streak;$("#da").textContent=d.times.length?(d.times.reduce((a,b)=>a+b,0)/d.times.length).toFixed(1)+"s":"—"}
-$("#drillEnter").onclick=()=>answerD(false);$("#drillBust").onclick=()=>answerD(true);
-$("#drillInput").addEventListener("keydown",e=>{if(e.key==="Enter")answerD(false)});
-$("#drillCount").onchange=startDrill;$("#resetDrill").onclick=()=>{d.correct=0;d.tries=0;d.streak=0;d.times=[];renderD();startDrill()};
+function renderPD(){$("#pc").textContent=`${pd.correct}/${pd.tries}`;$("#ps").textContent=pd.streak;$("#pa").textContent=pd.times.length?(pd.times.reduce((a,b)=>a+b,0)/pd.times.length).toFixed(1)+"s":"—"}
+$("#payoutEnter").onclick=answerPD;$("#payoutAnswer").addEventListener("keydown",e=>{if(e.key==="Enter")answerPD()});
 
-/* 3:2 blackjack payout trainer */
-let pt={correct:0,tries:0,streak:0,times:[],bet:5,start:0,locked:false};
-const commonBJAmounts=[5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,12.5,17.5,22.5,27.5,37.5,47.5];
-function nextCommonBet(){return Math.random()<.88?pick(commonBJAmounts.slice(0,20)):pick(commonBJAmounts.slice(20))}
-function startPayoutTrainer(){
-  if(payoutTrainer.classList.contains("hidden"))return;
-  pt.bet=nextCommonBet();pt.start=performance.now();pt.locked=false;
-  $("#payoutBetText").textContent=`$${money(pt.bet)}`;$("#payoutBetChips").innerHTML=chips(pt.bet);
-  $("#payoutTrainerInput").value="";$("#payoutTrainerFeedback").textContent="";setTimeout(()=>$("#payoutTrainerInput").focus(),40)
-}
-function renderPT(){
-  $("#pc").textContent=`${pt.correct}/${pt.tries}`;$("#ps").textContent=pt.streak;
-  $("#pa").textContent=pt.times.length?(pt.times.reduce((a,b)=>a+b,0)/pt.times.length).toFixed(1)+"s":"—"
-}
-function answerPT(){
-  if(pt.locked)return;
-  const val=parseFloat($("#payoutTrainerInput").value),expected=pt.bet*1.5;pt.tries++;
-  if(Math.abs(val-expected)<.001){
-    const t=(performance.now()-pt.start)/1000;pt.correct++;pt.streak++;pt.times.push(t);pt.locked=true;
-    $("#payoutTrainerFeedback").textContent=`Correct — add $${money(expected)}. Original $${money(pt.bet)} stays out.`;renderPT();setTimeout(startPayoutTrainer,650)
-  }else{pt.streak=0;$("#payoutTrainerFeedback").textContent="Not quite — pay one-and-a-half times the wager.";renderPT()}
-}
-$("#payoutTrainerEnter").onclick=answerPT;
-$("#payoutTrainerInput").addEventListener("keydown",e=>{if(e.key==="Enter")answerPT()});
-$("#payoutTrainerNext").onclick=startPayoutTrainer;
-
-shoe=newShoe();
-updateShoeUI();
+freshShoe();
 })();
 </script>
 </body>
