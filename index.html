@@ -808,6 +808,156 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   #sim .hand .cards{height:54px;min-height:54px}
 }
 
+
+/* ============================================================
+   VERSION 11 — iPHONE SAFARI LANDSCAPE HARD FIX
+   ============================================================ */
+@media (orientation:landscape){
+  body.liveDealerMode{
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    min-width:100vw !important;
+    max-width:none !important;
+    height:100dvh !important;
+    min-height:100dvh !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+  }
+  body.liveDealerMode .app{
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    min-width:100vw !important;
+    max-width:none !important;
+    height:100dvh !important;
+    min-height:100dvh !important;
+    margin:0 !important;
+    padding:0 !important;
+    overflow:hidden !important;
+  }
+  body.liveDealerMode .topbar{
+    position:absolute !important;
+    top:0 !important;
+    left:0 !important;
+    right:0 !important;
+    width:100vw !important;
+    max-width:none !important;
+    height:32px !important;
+    min-height:32px !important;
+    margin:0 !important;
+    padding:2px 8px !important;
+  }
+  body.liveDealerMode #sim.screen{
+    position:absolute !important;
+    top:32px !important;
+    left:0 !important;
+    right:0 !important;
+    bottom:0 !important;
+    width:100vw !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:calc(100dvh - 32px) !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:3px 6px calc(3px + env(safe-area-inset-bottom)) !important;
+    overflow:hidden !important;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:30px minmax(0,1fr) 84px !important;
+    gap:3px !important;
+  }
+  body.liveDealerMode #sim .toolbar{
+    grid-row:1 !important;
+    grid-column:1 !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:30px !important;
+    margin:0 !important;
+    padding:0 2px !important;
+    display:flex !important;
+    align-items:center !important;
+    flex-direction:row !important;
+    flex-wrap:nowrap !important;
+    overflow:hidden !important;
+  }
+  body.liveDealerMode #sim .table{
+    grid-row:2 !important;
+    grid-column:1 !important;
+    position:relative !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:100% !important;
+    min-height:0 !important;
+    margin:0 !important;
+    overflow:hidden !important;
+  }
+  body.liveDealerMode #sim .panel{
+    grid-row:3 !important;
+    grid-column:1 !important;
+    position:relative !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    height:84px !important;
+    min-height:84px !important;
+    margin:0 !important;
+    padding:6px 9px !important;
+    overflow:hidden !important;
+    display:grid !important;
+    grid-template-columns:minmax(180px,1fr) minmax(280px,1.65fr) !important;
+    grid-template-rows:auto 1fr !important;
+    column-gap:10px !important;
+  }
+  body.liveDealerMode #sim .players{
+    position:absolute !important;
+    left:8px !important;
+    right:8px !important;
+    bottom:4px !important;
+    width:auto !important;
+    max-width:none !important;
+    margin:0 !important;
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    gap:5px !important;
+  }
+  body.liveDealerMode #sim .rackPanel{
+    position:absolute !important;
+    left:6px !important;
+    right:6px !important;
+    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
+    width:auto !important;
+    max-width:none !important;
+    height:112px !important;
+    margin:0 !important;
+    z-index:100 !important;
+  }
+}
+@media (orientation:landscape) and (max-height:390px){
+  body.liveDealerMode #sim.screen{
+    grid-template-rows:28px minmax(0,1fr) 72px !important;
+  }
+  body.liveDealerMode #sim .toolbar{
+    height:28px !important;
+    min-height:28px !important;
+  }
+  body.liveDealerMode #sim .panel{
+    height:72px !important;
+    min-height:72px !important;
+    padding:4px 7px !important;
+  }
+  body.liveDealerMode #sim .players{
+    grid-auto-rows:120px !important;
+  }
+  body.liveDealerMode #sim .seat{
+    height:120px !important;
+    min-height:120px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -998,9 +1148,13 @@ const session={
 const sleep=ms=>new Promise(r=>{const id=setTimeout(r,Math.max(70,ms*(speedMap[speedMode]||1)));timerHandles.push(id)});
 function clearTimers(){timerHandles.forEach(clearTimeout);timerHandles=[]}
 function show(which){
-  [menu,sim,drill,payoutTrainer].forEach(x=>x.classList.add("hidden"));$("#rotateNotice").classList.add("hidden");
+  [menu,sim,drill,payoutTrainer].forEach(x=>x.classList.add("hidden"));
+  $("#rotateNotice").classList.add("hidden");
+  document.body.classList.remove("liveDealerMode");
   if(which==="menu"){menu.classList.remove("hidden");back.classList.add("hidden")}
-  if(which==="sim"){sim.classList.remove("hidden");back.classList.remove("hidden");
+  if(which==="sim"){
+    sim.classList.remove("hidden");back.classList.remove("hidden");
+    document.body.classList.add("liveDealerMode");
     if(window.matchMedia("(orientation:portrait) and (max-width:900px)").matches)$("#rotateNotice").classList.remove("hidden")
   }
   if(which==="drill"){drill.classList.remove("hidden");back.classList.remove("hidden");startDrill()}
