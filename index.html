@@ -1182,6 +1182,221 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   }
 }
 
+
+/* ============================================================
+   VERSION 13 — MOBILE CASINO HUD
+   Full table + thin action HUD + compact payout tray.
+   ============================================================ */
+@media (orientation:landscape) {
+  body.liveDealerMode #sim.screen{
+    display:block !important;
+    position:absolute !important;
+    top:32px !important; left:0 !important; right:0 !important; bottom:0 !important;
+    width:100vw !important; height:calc(100dvh - 32px) !important;
+    margin:0 !important; padding:0 !important; overflow:hidden !important;
+  }
+
+  body.liveDealerMode #sim .toolbar{
+    position:absolute !important;
+    top:0 !important; left:6px !important; right:6px !important;
+    height:28px !important; min-height:28px !important;
+    width:auto !important; margin:0 !important; padding:0 2px !important;
+    display:flex !important; align-items:center !important; gap:5px !important;
+    overflow:hidden !important; z-index:30 !important;
+  }
+
+  /* Nearly the entire phone is the felt. */
+  body.liveDealerMode #sim .table{
+    position:absolute !important;
+    top:30px !important; left:5px !important; right:5px !important;
+    bottom:54px !important;
+    width:auto !important; height:auto !important;
+    min-width:0 !important; min-height:0 !important; max-width:none !important;
+    margin:0 !important; padding:2px 8px 4px !important;
+    overflow:hidden !important;
+    border-radius:20% 20% 5% 5% / 10% 10% 3% 3% !important;
+  }
+
+  /* Dealer gets a clean, visible lane. */
+  body.liveDealerMode #sim .dealer{
+    height:64px !important; min-height:64px !important;
+    position:relative !important; z-index:4 !important;
+  }
+  body.liveDealerMode #sim .dealer .cards{
+    height:49px !important; min-height:49px !important;
+  }
+  body.liveDealerMode #sim .dealer .card{
+    width:35px !important; height:49px !important;
+    font-size:.5rem !important;
+  }
+
+  /* Five readable betting positions. */
+  body.liveDealerMode #sim .players{
+    position:absolute !important;
+    left:8px !important; right:8px !important; bottom:5px !important;
+    width:auto !important; margin:0 !important;
+    display:grid !important;
+    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+    grid-auto-rows:132px !important;
+    gap:5px !important;
+  }
+  body.liveDealerMode #sim .seat{
+    height:132px !important; min-height:132px !important;
+    padding:3px !important; border-radius:10px !important;
+  }
+  body.liveDealerMode #sim .seatTitle{font-size:.55rem !important}
+  body.liveDealerMode #sim .sideSpot{
+    min-height:28px !important; font-size:.37rem !important;
+  }
+  body.liveDealerMode #sim .sideSpot b{font-size:.40rem !important}
+  body.liveDealerMode #sim .bet{font-size:.48rem !important}
+  body.liveDealerMode #sim .betStacks{height:17px !important;min-height:17px !important}
+  body.liveDealerMode #sim .chip{width:18px !important;height:18px !important;font-size:.32rem !important}
+  body.liveDealerMode #sim .hand .cards{height:45px !important;min-height:45px !important}
+  body.liveDealerMode #sim .hand .card{
+    width:32px !important;height:45px !important;
+    margin-left:-9px !important;font-size:.45rem !important;
+  }
+  body.liveDealerMode #sim .hand .card .big{font-size:.9rem !important}
+
+  /* THIN HUD: one fixed bar, no explanatory box taking table space. */
+  body.liveDealerMode #sim .panel{
+    position:absolute !important;
+    left:5px !important; right:5px !important;
+    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
+    width:auto !important; height:47px !important;
+    min-height:47px !important; max-height:47px !important;
+    margin:0 !important; padding:4px 7px !important;
+    z-index:50 !important; overflow:hidden !important;
+    border-radius:10px !important;
+    display:grid !important;
+    grid-template-columns:minmax(125px,31%) minmax(0,69%) !important;
+    grid-template-rows:1fr !important;
+    gap:6px !important;
+    align-items:center !important;
+    background:rgba(1,25,18,.96) !important;
+  }
+  body.liveDealerMode #sim .status{
+    position:static !important; grid-column:1 !important; grid-row:1 !important;
+    width:100% !important; min-width:0 !important; margin:0 !important;
+    font-size:.62rem !important; line-height:1.08 !important;
+    white-space:normal !important; overflow:hidden !important;
+    display:-webkit-box !important; -webkit-line-clamp:2 !important;
+    -webkit-box-orient:vertical !important;
+  }
+  /* Explanatory prose is intentionally hidden in live phone play. */
+  body.liveDealerMode #sim .substatus{display:none !important}
+
+  body.liveDealerMode #sim #totalEntry,
+  body.liveDealerMode #sim #settleArea,
+  body.liveDealerMode #sim #collectCards{
+    position:static !important;
+    grid-column:2 !important; grid-row:1 !important;
+    width:100% !important; min-width:0 !important; max-width:100% !important;
+    margin:0 !important; align-self:center !important;
+  }
+
+  body.liveDealerMode #sim #totalEntry{
+    display:flex !important; flex-wrap:nowrap !important;
+    justify-content:flex-end !important; align-items:center !important; gap:4px !important;
+  }
+  body.liveDealerMode #sim #totalEntry.hidden{display:none !important}
+  body.liveDealerMode #sim #totalEntry input{
+    width:70px !important; height:36px !important;
+    padding:.35rem !important; font-size:.72rem !important;
+  }
+  body.liveDealerMode #sim #totalEntry button{
+    height:36px !important; padding:.35rem .55rem !important; font-size:.58rem !important;
+  }
+
+  body.liveDealerMode #sim #settleArea .settlementGrid{
+    display:flex !important;
+    flex-direction:row !important; flex-wrap:nowrap !important;
+    justify-content:flex-end !important; gap:4px !important;
+    width:100% !important; margin:0 !important;
+  }
+  body.liveDealerMode #sim #settleArea .settle{
+    flex:1 1 0 !important;
+    min-width:0 !important; height:36px !important;
+    padding:.3rem .25rem !important;
+    font-size:.57rem !important; white-space:nowrap !important;
+  }
+  body.liveDealerMode #sim #payoutLine{display:none !important}
+  body.liveDealerMode #sim #collectCards{
+    height:36px !important; padding:.3rem .7rem !important;
+  }
+  body.liveDealerMode #sim .roundSummary{display:none !important}
+
+  /* COMPACT CHIP TRAY. It appears only when JS opens the rack.
+     It no longer covers the dealer or the player cards. */
+  body.liveDealerMode #sim .rackPanel{
+    position:absolute !important;
+    left:5px !important; right:5px !important;
+    bottom:calc(3px + env(safe-area-inset-bottom)) !important;
+    width:auto !important; height:76px !important;
+    min-height:76px !important; max-height:76px !important;
+    margin:0 !important; padding:4px 7px !important;
+    z-index:90 !important; overflow:hidden !important;
+    border-radius:10px !important;
+    background:rgba(1,25,18,.985) !important;
+    display:grid !important;
+    grid-template-columns:155px minmax(0,1fr) 175px !important;
+    grid-template-rows:1fr !important;
+    gap:6px !important; align-items:center !important;
+  }
+  body.liveDealerMode #sim .rackPanel.hidden{display:none !important}
+  body.liveDealerMode #sim .rackPanel .status{
+    display:block !important; grid-column:1 !important;
+    font-size:.58rem !important; line-height:1.08 !important;
+  }
+  body.liveDealerMode #sim .rackPanel .substatus{display:none !important}
+  body.liveDealerMode #sim .rack{
+    grid-column:2 !important;
+    display:grid !important;
+    grid-template-columns:repeat(8,minmax(0,1fr)) !important;
+    gap:2px !important; margin:0 !important;
+  }
+  body.liveDealerMode #sim .rackChip{
+    padding:1px !important; font-size:.36rem !important;
+  }
+  body.liveDealerMode #sim .rackChip .chip{
+    width:25px !important; height:25px !important; font-size:.38rem !important;
+  }
+  body.liveDealerMode #sim .rackFooter{
+    grid-column:3 !important;
+    display:flex !important; flex-direction:row !important;
+    align-items:center !important; justify-content:flex-end !important;
+    gap:3px !important; margin:0 !important;
+  }
+  body.liveDealerMode #sim .rackFooter strong{
+    font-size:.55rem !important; white-space:nowrap !important;
+  }
+  body.liveDealerMode #sim .rackFooter button{
+    height:34px !important; padding:.3rem .45rem !important; font-size:.52rem !important;
+  }
+}
+
+/* Very short landscape phones: shave a few more pixels without shrinking width. */
+@media (orientation:landscape) and (max-height:390px){
+  body.liveDealerMode #sim .table{bottom:49px !important}
+  body.liveDealerMode #sim .panel{
+    height:43px !important; min-height:43px !important; max-height:43px !important;
+  }
+  body.liveDealerMode #sim .players{
+    grid-auto-rows:112px !important;
+  }
+  body.liveDealerMode #sim .seat{
+    height:112px !important; min-height:112px !important;
+  }
+  body.liveDealerMode #sim .sideSpot{min-height:23px !important}
+  body.liveDealerMode #sim .hand .cards{height:38px !important;min-height:38px !important}
+  body.liveDealerMode #sim .hand .card{width:28px !important;height:39px !important}
+  body.liveDealerMode #sim .rackPanel{
+    height:68px !important; min-height:68px !important; max-height:68px !important;
+    grid-template-columns:130px minmax(0,1fr) 160px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1270,8 +1485,8 @@ select{border:0;border-radius:10px;padding:.6rem;font-weight:800}
   </section>
 
   <section id="rackPanel" class="panel rackPanel hidden">
-    <div class="status">Chip Rack — add the dealer payout</div>
-    <div class="substatus">The player's original wager stays on the layout. Build only the additional chips you place next to it.</div>
+    <div class="status">Payout Tray</div>
+    <div class="substatus">Original wager stays out.</div>
     <div id="rack" class="rack"></div>
     <div class="rackFooter">
       <span id="rackTotal" class="badge">Selected: $0</span>
@@ -1826,7 +2041,7 @@ function restoreSettleButtons(){
 }
 async function settlePokerBets(){
   g.phase="sidebets";g.sideQueue=buildSideQueue();g.sideIndex=0;
-  if(!g.sideQueue.length){status("No poker side bets this round.","Moving directly into blackjack play.");await sleep(220);return}
+  if(!g.sideQueue.length){status("No side bets.","Blackjack action.");await sleep(220);return}
   return new Promise(resolve=>{g.sideResolveAll=resolve;showSideBet()})
 }
 function showSideBet(){
@@ -1834,7 +2049,7 @@ function showSideBet(){
   if(g.sideIndex>=g.sideQueue.length){
     g.sideCurrent=null;render();restoreSettleButtons();
     const r=g.sideResolveAll;g.sideResolveAll=null;
-    status("Poker bets settled.","Now begin the blackjack hand decisions.");
+    status("Poker bets cleared.","Blackjack action.");
     setTimeout(()=>r&&r(),Math.max(80,220*(speedMap[speedMode]||1)));return
   }
   const q=g.sideQueue[g.sideIndex];g.sideCurrent=q;render();
@@ -1843,7 +2058,7 @@ function showSideBet(){
     const a=b.dataset.settle;b.style.display=(a==="take"||a==="pay1")?"":"none";
     b.textContent=a==="take"?"Take Side Bet":"Pay Side Bet"
   });
-  status(`Settle Player ${q.pi+1} — ${sideLabel(q.type)}.`,`Resolve this from the two player cards and dealer up card before any blackjack action.`);
+  status(`P${q.pi+1} — ${sideLabel(q.type)} $${money(q.bet)}`,``);
   $("#payoutLine").textContent=`${sideLabel(q.type)} wager: $${money(q.bet)}`
 }
 
